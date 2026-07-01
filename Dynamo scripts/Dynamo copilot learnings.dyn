@@ -1,0 +1,501 @@
+{
+  "Uuid": "2d1d5ab7-9911-4eac-b3e0-69ba8f1198cc",
+  "IsCustomNode": false,
+  "Description": "",
+  "Name": "Dynamo copilot learnings",
+  "ElementResolver": {
+    "ResolutionMap": {}
+  },
+  "Inputs": [],
+  "Outputs": [],
+  "Nodes": [
+    {
+      "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
+      "Code": "import clr\r\n\r\nimport sys\r\nsys.path.append('C:\\Program Files (x86)\\IronPython 2.7\\Lib')\r\n\r\nimport System\r\nfrom System.Collections.Generic import *\r\n\r\nclr.AddReference('ProtoGeometry')\r\nfrom Autodesk.DesignScript.Geometry import *\r\n\r\nclr.AddReference(\"RevitNodes\")\r\nimport Revit\r\nclr.ImportExtensions(Revit.Elements)\r\nclr.ImportExtensions(Revit.GeometryConversion)\r\nclr.AddReference(\"RevitServices\")\r\nimport RevitServices\r\nfrom RevitServices.Persistence import DocumentManager \r\nfrom RevitServices.Transactions import TransactionManager \r\n\r\nclr.AddReference(\"RevitAPI\")\r\nclr.AddReference(\"RevitAPIUI\")\r\n\r\nimport Autodesk \r\nfrom Autodesk.Revit.DB import *\r\nfrom Autodesk.Revit.UI import *\r\n\r\ndoc = DocumentManager.Instance.CurrentDBDocument\r\nuiapp = DocumentManager.Instance.CurrentUIApplication \r\napp = uiapp.Application \r\nuidoc = uiapp.ActiveUIDocument\r\n\r\ndef tolist(obj1):\r\n    if isinstance(obj1,(list, tuple, set)): return obj1\r\n    else: return [obj1]\r\n\r\n#Preparing input from dynamo to revit\r\nwalls = tolist(UnwrapElement(IN[0]))\r\n\r\n#Do some action in a Transaction\r\n\r\nTransactionManager.Instance.EnsureInTransaction(doc)\r\n\r\nwallparvalues = []\r\n\r\n\r\nfor wall in walls:\r\n    wallpar = wall.LookupParameter(\"Comments\")\r\n    wallparval = wallpar.AsString()\r\n    wallparvalues.append(wallparval)\r\n    #wallpar.Set(\"It is confirmed\")\r\n    \r\n    walltypid = wall.GetTypeId()\r\n    walltyp = doc.GetElement(walltypid)\r\n    wtpar = walltyp.LookupParameter(\"Type Comments\")\r\n    wtparval = wtpar.AsString()\r\n    wallparvalues.append(wtparval)\r\n   #wtparset = wtpar.Set(\"Tower A\")\r\n\r\n\r\nparamNames = []\r\n\r\nfor wall in walls:\r\n    par = wall.Parameters\r\n    for p in par:\r\n        paramNames.append(p.Definition.Name)\r\n\r\n\r\nTransactionManager.Instance.TransactionTaskDone()\r\n\r\nOUT = wallparvalues #wtparval",
+      "Engine": "CPython3",
+      "VariableInputPorts": true,
+      "Id": "f5ca3d8d467a4f3ba2693e478c9c0793",
+      "NodeType": "PythonScriptNode",
+      "Inputs": [
+        {
+          "Id": "2fc45cbd8a9540359180e2d45079b6d2",
+          "Name": "IN[0]",
+          "Description": "Input #0",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "4809827def784c2e91781e1070b7761e",
+          "Name": "OUT",
+          "Description": "Result of the python script",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Runs an embedded Python script."
+    },
+    {
+      "ConcreteType": "Dynamo.Nodes.DSModelElementSelection, DSRevitNodesUI",
+      "NodeType": "ExtensionNode",
+      "InstanceId": [
+        "415feb8f-5392-4764-b8cf-5c5352a1a0af-0004e514"
+      ],
+      "Id": "e3f22235b8ed4322ae60e0c8cfd940fe",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "dfbc6743618748608663f13b75e365f9",
+          "Name": "Element",
+          "Description": "The selected elements.",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Select a model element from the document."
+    },
+    {
+      "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
+      "Code": "import clr\r\n\r\nimport sys\r\nsys.path.append('C:\\Program Files (x86)\\IronPython 2.7\\Lib')\r\n\r\nimport System\r\nfrom System.Collections.Generic import *\r\n\r\nclr.AddReference('ProtoGeometry')\r\nfrom Autodesk.DesignScript.Geometry import *\r\n\r\nclr.AddReference(\"RevitNodes\")\r\nimport Revit\r\nclr.ImportExtensions(Revit.Elements)\r\nclr.ImportExtensions(Revit.GeometryConversion)\r\nclr.AddReference(\"RevitServices\")\r\nimport RevitServices\r\nfrom RevitServices.Persistence import DocumentManager \r\nfrom RevitServices.Transactions import TransactionManager \r\n\r\nclr.AddReference(\"RevitAPI\")\r\nclr.AddReference(\"RevitAPIUI\")\r\n\r\nimport Autodesk \r\nfrom Autodesk.Revit.DB import *\r\nfrom Autodesk.Revit.UI import *\r\n\r\ndoc = DocumentManager.Instance.CurrentDBDocument\r\nuiapp = DocumentManager.Instance.CurrentUIApplication \r\napp = uiapp.Application \r\nuidoc = uiapp.ActiveUIDocument\r\n\r\ndef tolist(obj1):\r\n\tif isinstance(obj1,(list, tuple, set)): return obj1\r\n\telse: return [obj1]\r\n\r\n#Preparing input from dynamo to revit\r\nelements = UnwrapElement(IN[0])\r\n\r\nwallType = UnwrapElement(IN[1])\r\n\r\n#Do some action in a Transaction\r\n\r\nTransactionManager.Instance.EnsureInTransaction(doc)\r\n\r\n\"\"\"\r\nfor element in elements:\r\n    tcId = element.GetTypeId()\r\n    tc = doc.GetElement(tcId)\r\n    c1 = tc.LookupParameter(\"Type Comments\").AsString()\r\n    \r\n    a1 = element.LookupParameter(\"Unconnected Height\").AsDouble()*304.8\r\n    \r\n    cleanValue = round(a1,2)\r\n    \r\n    c2 = element.LookupParameter(\"Comments\")\r\n    c2.Set(str(cleanValue))\r\n    \r\n\"\"\"\r\n\r\n\r\n\r\nTransactionManager.Instance.TransactionTaskDone()\r\n\r\nOUT = wallType.LookupParameter(\"Type Comments\").AsString()",
+      "Engine": "CPython3",
+      "VariableInputPorts": true,
+      "Id": "72eed4b0417e44faa9e81a344514ad28",
+      "NodeType": "PythonScriptNode",
+      "Inputs": [
+        {
+          "Id": "f79743af99f946ce9a8c06012317fe65",
+          "Name": "IN[0]",
+          "Description": "Input #0",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "baf7ecddf8e74174ac1e31d2671757f8",
+          "Name": "IN[1]",
+          "Description": "Input #1",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "d84741a5a33841a59a20daa3ecfbde31",
+          "Name": "OUT",
+          "Description": "Result of the python script",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Runs an embedded Python script."
+    },
+    {
+      "ConcreteType": "Dynamo.Nodes.DSModelElementsSelection, DSRevitNodesUI",
+      "NodeType": "ExtensionNode",
+      "InstanceId": [
+        "415feb8f-5392-4764-b8cf-5c5352a1a0af-0004e47e",
+        "415feb8f-5392-4764-b8cf-5c5352a1a0af-0004e4b9",
+        "415feb8f-5392-4764-b8cf-5c5352a1a0af-0004e514"
+      ],
+      "Id": "df195dcd8f3442b59155de75e1542cca",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "ce13c1a8947c400f8fc52b2d3988dd00",
+          "Name": "Elements",
+          "Description": "The selected elements.",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Select multiple elements from the Revit document."
+    },
+    {
+      "ConcreteType": "DSRevitNodesUI.WallTypes, DSRevitNodesUI",
+      "SelectedIndex": 25,
+      "SelectedString": "Wall-Site_215Bwk_w-Footing",
+      "Id": "222f21da817a4eaba9f25789e80d79fc",
+      "NodeType": "ExtensionNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "5837b3ccd1b143caa5266147556c76ac",
+          "Name": "Wall Type",
+          "Description": "The selected Wall Type",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "All wall types available in the document."
+    },
+    {
+      "ConcreteType": "Dynamo.Nodes.DSModelElementSelection, DSRevitNodesUI",
+      "NodeType": "ExtensionNode",
+      "InstanceId": [
+        "415feb8f-5392-4764-b8cf-5c5352a1a0af-0004e514"
+      ],
+      "Id": "4a25931b335d42c88b55aaa093745818",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "12c942e07f3942f3a46fe1fbfbc1f4f1",
+          "Name": "Element",
+          "Description": "The selected elements.",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Select a model element from the document."
+    },
+    {
+      "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
+      "Code": "# Standard Dynamo Python Script template\nimport clr\n\nclr.AddReference('RevitAPI')\nclr.AddReference('RevitAPIUI')\nclr.AddReference('RevitServices')\nclr.AddReference('RevitNodes') # Contains Revit.Elements and ElementWrapper\n\nfrom Autodesk.Revit.DB import *\nfrom RevitServices.Persistence import DocumentManager\nfrom RevitServices.Transactions import TransactionManager\n\n# Explicitly import ElementWrapper and its UnwrapElement method\n# This is the most reliable method when direct import fails\nimport Revit\nclr.ImportExtensions(Revit.Elements) # This makes .ToDSType(bool) and .InternalElement available\n# However, for unwrapping, ElementWrapper.UnwrapElement is more direct\n\ndoc = DocumentManager.Instance.CurrentDBDocument\nuidoc = DocumentManager.Instance.CurrentUIApplication.ActiveUIDocument\n\n# Inputs from connected nodes\n# IN[0] expects a single Wall element\ninput_wall = IN[0]\n\nworkset_name = \"Workset Not Found\"\n\nif input_wall is not None:\n    # Use ElementWrapper.UnwrapElement to get the native Revit Element\n    # This method is generally very reliable for unwrapping Dynamo elements\n    wall = input_wall.InternalElement # This is the most direct way to get the internal Revit API element from a Dynamo wrapper.\n    \n    if wall is not None:\n        # Get the WorksetId of the wall\n        workset_id = wall.WorksetId\n        \n        # Verify the document is workshared and the WorksetId is valid\n        if doc.IsWorkshared and workset_id != WorksetId.InvalidWorksetId:\n            workset_table = doc.GetWorksetTable()\n            if workset_table:\n                workset = workset_table.GetWorkset(workset_id)\n                if workset is not None:\n                    workset_name = workset.Name\n        else:\n            workset_name = \"Non-Workshared Document or Invalid WorksetId\"\n    else:\n        workset_name = \"Input element could not be unwrapped.\"\n\n# Output must be assigned to OUT\nOUT = workset_name",
+      "Engine": "CPython3",
+      "VariableInputPorts": true,
+      "Id": "6cf6e8e22a61418bb5501561405cd7e0",
+      "NodeType": "PythonScriptNode",
+      "Inputs": [
+        {
+          "Id": "3b1fdca57862410f93c501dc361bc346",
+          "Name": "IN[0]",
+          "Description": "Input #0",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "2283c45be74241ab944e190b6b9db704",
+          "Name": "OUT",
+          "Description": "Result of the python script",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Runs an embedded Python script."
+    },
+    {
+      "ConcreteType": "Dynamo.Nodes.DSModelElementsSelection, DSRevitNodesUI",
+      "NodeType": "ExtensionNode",
+      "InstanceId": [
+        "415feb8f-5392-4764-b8cf-5c5352a1a0af-0004e47e",
+        "415feb8f-5392-4764-b8cf-5c5352a1a0af-0004e4b9",
+        "415feb8f-5392-4764-b8cf-5c5352a1a0af-0004e514"
+      ],
+      "Id": "d1eb7bb0b4f7428d8ddd874254d55181",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "82dc7fee5a5543bbb49014264eb0ffd4",
+          "Name": "Elements",
+          "Description": "The selected elements.",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Select multiple elements from the Revit document."
+    },
+    {
+      "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
+      "Code": "# Standard Dynamo Python Script template\nimport clr\n\nclr.AddReference('RevitAPI')\nclr.AddReference('RevitAPIUI')\nclr.AddReference('RevitServices')\nclr.AddReference('RevitNodes')\n\nfrom Autodesk.Revit.DB import *\nfrom Autodesk.Revit.UI import *\nfrom RevitServices.Persistence import DocumentManager\n\n# Inputs from connected nodes are available via IN list\n# IN[0]: List of element ID integers\ninput_ids = IN[0]\n\ndoc = DocumentManager.Instance.CurrentDBDocument\nuidoc = DocumentManager.Instance.CurrentUIApplication.ActiveUIDocument\n\nsuccess = False\n\nif uidoc and input_ids is not None:\n    # Ensure input is treated as a list\n    if not isinstance(input_ids, list):\n        input_ids = [input_ids]\n        \n    try:\n        # Convert integer list to Revit ElementId objects\n        element_ids = []\n        for id_int in input_ids:\n            if isinstance(id_int, int) or str(id_int).isdigit():\n                element_ids.append(ElementId(int(id_int)))\n        \n        # Select the elements in the UI\n        # System.Collections.Generic.List is required for SetElementIds in Revit API\n        import System\n        from System.Collections.Generic import List\n        \n        id_list = List[ElementId](element_ids)\n        uidoc.Selection.SetElementIds(id_list)\n        \n        # Refresh the active view to display the selection\n        uidoc.RefreshActiveView()\n        success = True\n    except Exception:\n        success = False\n\n# Output must be assigned to OUT\nOUT = success",
+      "Engine": "CPython3",
+      "VariableInputPorts": true,
+      "Id": "aed7225ef92d4bd0add6f6fac60e5875",
+      "NodeType": "PythonScriptNode",
+      "Inputs": [
+        {
+          "Id": "e3fee992d0aa4024a8bf64d3d55338fd",
+          "Name": "IN[0]",
+          "Description": "Input #0",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "1cf3a255a74e4985abc4d52bbc33382f",
+          "Name": "OUT",
+          "Description": "Result of the python script",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Runs an embedded Python script."
+    },
+    {
+      "ConcreteType": "Dynamo.Graph.Nodes.CodeBlockNodeModel, DynamoCore",
+      "Id": "70051b3aa42d4109b0920c8f7814ca4c",
+      "NodeType": "CodeBlockNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "2d998ff8a7664ae6bf9cf58a5581534a",
+          "Name": "",
+          "Description": "Value of expression at line 1",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Allows for DesignScript code to be authored directly",
+      "Code": "[320697, 320638];"
+    }
+  ],
+  "Connectors": [
+    {
+      "Start": "dfbc6743618748608663f13b75e365f9",
+      "End": "2fc45cbd8a9540359180e2d45079b6d2",
+      "Id": "0546bd3881034daaba5a6a3e0c3a9690",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "ce13c1a8947c400f8fc52b2d3988dd00",
+      "End": "f79743af99f946ce9a8c06012317fe65",
+      "Id": "487edac61ded41a4a4b29824f384c9a9",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "5837b3ccd1b143caa5266147556c76ac",
+      "End": "baf7ecddf8e74174ac1e31d2671757f8",
+      "Id": "298d818b460243248930d9a592104f2e",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "12c942e07f3942f3a46fe1fbfbc1f4f1",
+      "End": "fb4a8aebc2f24621bde3445a762c7a6c",
+      "Id": "50006780bf1d44afb01cfbe7e67416d6",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "12c942e07f3942f3a46fe1fbfbc1f4f1",
+      "End": "b3e02d29c906480395ba55f300ce3f31",
+      "Id": "b0963d4fa0f046a89031cbca71266951",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "12c942e07f3942f3a46fe1fbfbc1f4f1",
+      "End": "ff0d4e31cf374acd8d2b9b74210aa137",
+      "Id": "20e93cfcabd54a46afda16cca8ec8285",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "12c942e07f3942f3a46fe1fbfbc1f4f1",
+      "End": "2fb356a2a32a4580b337451d41712bee",
+      "Id": "3199390a527c41a0b965ddb12005838f",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "12c942e07f3942f3a46fe1fbfbc1f4f1",
+      "End": "3b1fdca57862410f93c501dc361bc346",
+      "Id": "4085982f581e4b94b96a5a2a983ac4fb",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "82dc7fee5a5543bbb49014264eb0ffd4",
+      "End": "8e461a294bf44d008ac6a34232c82e27",
+      "Id": "f17102c72ce34f46ad0f342d8d28d47a",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "2d998ff8a7664ae6bf9cf58a5581534a",
+      "End": "e3fee992d0aa4024a8bf64d3d55338fd",
+      "Id": "b61e8935b0814bb6ab755a939594cdf3",
+      "IsHidden": "False"
+    }
+  ],
+  "Dependencies": [],
+  "NodeLibraryDependencies": [],
+  "EnableLegacyPolyCurveBehavior": null,
+  "Thumbnail": "",
+  "GraphDocumentationURL": null,
+  "ExtensionWorkspaceData": [
+    {
+      "ExtensionGuid": "28992e1d-abb9-417f-8b1b-05e053bee670",
+      "Name": "Properties",
+      "Version": "3.3",
+      "Data": {}
+    },
+    {
+      "ExtensionGuid": "DFBD9CC0-DB40-457A-939E-8C8555555A9D",
+      "Name": "Generative Design",
+      "Version": "8.2",
+      "Data": {}
+    }
+  ],
+  "Author": "",
+  "Linting": {
+    "activeLinter": "None",
+    "activeLinterId": "7b75fb44-43fd-4631-a878-29f4d5d8399a",
+    "warningCount": 0,
+    "errorCount": 0
+  },
+  "Bindings": [],
+  "View": {
+    "Dynamo": {
+      "ScaleFactor": 1.0,
+      "HasRunWithoutCrash": true,
+      "IsVisibleInDynamoLibrary": true,
+      "Version": "3.3.0.6316",
+      "RunType": "Manual",
+      "RunPeriod": "1000"
+    },
+    "Camera": {
+      "Name": "_Background Preview",
+      "EyeX": -17.0,
+      "EyeY": 24.0,
+      "EyeZ": 50.0,
+      "LookX": 12.0,
+      "LookY": -13.0,
+      "LookZ": -58.0,
+      "UpX": 0.0,
+      "UpY": 1.0,
+      "UpZ": 0.0
+    },
+    "ConnectorPins": [],
+    "NodeViews": [
+      {
+        "Id": "f5ca3d8d467a4f3ba2693e478c9c0793",
+        "Name": "Adithya code",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": true,
+        "ShowGeometry": true,
+        "X": 605.6544951393809,
+        "Y": 351.7427550905582
+      },
+      {
+        "Id": "e3f22235b8ed4322ae60e0c8cfd940fe",
+        "Name": "Select Model Element",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 283.29189222109113,
+        "Y": 365.22010631285605
+      },
+      {
+        "Id": "72eed4b0417e44faa9e81a344514ad28",
+        "Name": "Python Script",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": true,
+        "ShowGeometry": true,
+        "X": 913.0639565900692,
+        "Y": 40.403649852731604
+      },
+      {
+        "Id": "df195dcd8f3442b59155de75e1542cca",
+        "Name": "Select Model Elements",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 589.6812471279834,
+        "Y": -78.78438639517063
+      },
+      {
+        "Id": "222f21da817a4eaba9f25789e80d79fc",
+        "Name": "Wall Types",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 563.0868601693611,
+        "Y": 206.57459516272266
+      },
+      {
+        "Id": "4a25931b335d42c88b55aaa093745818",
+        "Name": "Select Model Element",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 1493.5132585124743,
+        "Y": 69.22327456025153
+      },
+      {
+        "Id": "6cf6e8e22a61418bb5501561405cd7e0",
+        "Name": "Python Script",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": true,
+        "ShowGeometry": true,
+        "X": 1790.4844954493537,
+        "Y": 100.18262183351833
+      },
+      {
+        "Id": "d1eb7bb0b4f7428d8ddd874254d55181",
+        "Name": "Select Model Elements",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 1640.3761739793943,
+        "Y": -294.5473725089024
+      },
+      {
+        "Id": "aed7225ef92d4bd0add6f6fac60e5875",
+        "Name": "Karthik code",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 2045.7217934562395,
+        "Y": -577.3296371841217
+      },
+      {
+        "Id": "70051b3aa42d4109b0920c8f7814ca4c",
+        "Name": "Code Block",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 1764.261071224668,
+        "Y": -594.9402726049302
+      }
+    ],
+    "Annotations": [],
+    "X": -2764.0594173874056,
+    "Y": 1196.6287918285816,
+    "Zoom": 1.4523962864458846
+  }
+}

@@ -1,0 +1,112 @@
+{
+  "Uuid": "ca6df1f7-04fc-470c-962a-1f07d8480e20",
+  "IsCustomNode": false,
+  "Description": "",
+  "Name": "FEC 2",
+  "ElementResolver": {
+    "ResolutionMap": {}
+  },
+  "Inputs": [],
+  "Outputs": [],
+  "Nodes": [
+    {
+      "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
+      "Code": "import clr\r\n\r\nimport sys\r\nsys.path.append('C:\\Program Files (x86)\\IronPython 2.7\\Lib')\r\n\r\nimport System\r\nfrom System.Collections.Generic import *\r\n\r\nclr.AddReference('ProtoGeometry')\r\nfrom Autodesk.DesignScript.Geometry import *\r\n\r\nclr.AddReference(\"RevitNodes\")\r\nimport Revit\r\nclr.ImportExtensions(Revit.Elements)\r\nclr.ImportExtensions(Revit.GeometryConversion)\r\nclr.AddReference(\"RevitServices\")\r\nimport RevitServices\r\nfrom RevitServices.Persistence import DocumentManager \r\nfrom RevitServices.Transactions import TransactionManager \r\n\r\nclr.AddReference(\"RevitAPI\")\r\nclr.AddReference(\"RevitAPIUI\")\r\n\r\nimport Autodesk \r\nfrom Autodesk.Revit.DB import *\r\nfrom Autodesk.Revit.DB.Mechanical import *\r\nfrom Autodesk.Revit.DB.Electrical import *\r\nfrom Autodesk.Revit.UI import *\r\n\r\ndoc = DocumentManager.Instance.CurrentDBDocument\r\nuiapp = DocumentManager.Instance.CurrentUIApplication \r\napp = uiapp.Application \r\nuidoc = uiapp.ActiveUIDocument\r\n\r\ndef tolist(obj1):\r\n\tif isinstance(obj1,(list, tuple, set)): return obj1\r\n\telse: return [obj1]\r\n\r\n#Preparing input from dynamo to revit\r\nelement = UnwrapElement(IN[0])\r\n\r\n#Do some action in a Transaction\r\n\r\nTransactionManager.Instance.EnsureInTransaction(doc)\r\n\r\nfec = FilteredElementCollector(doc)\r\n\r\nwalls = FilteredElementCollector(doc).OfClass(Wall).ToElements()\r\n\r\nducts = FilteredElementCollector(doc).OfClass(Duct).ToElements()\r\n\r\ncpValues = []\r\nfor wall in walls: cpValues.append(wall.Name)   \r\n     \r\n    \r\nnames = [i.LookupParameter(\"Comments\").AsString()  for i in walls]\r\n\r\n\r\nactiveView = doc.ActiveView\r\n\r\nwallsInCurrentView = FilteredElementCollector(doc, activeView.Id).OfClass(Wall).ToElements()\r\n\r\n\r\ncatList = List[BuiltInCategory]()\r\ncatList.Add(BuiltInCategory.OST_Walls)\r\ncatList.Add(BuiltInCategory.OST_DuctCurves)\r\ncatList.Add(BuiltInCategory.OST_CableTray)\r\n\r\n\r\ncatFilt = ElementMulticategoryFilter(catList)\r\n\r\n\r\nfec = FilteredElementCollector(doc).WherePasses(catFilt).WhereElementIsNotElementType().ToElements()\r\n\r\nallLevels = FilteredElementCollector(doc).OfClass(Level).ToElements()\r\n\r\nlevel0 = None\r\n\r\nfor level in allLevels:\r\n    if level.Name == \"Level 0\":\r\n        level0 = level\r\n\r\n\r\nlevelFilt = ElementLevelFilter(level0.Id)\r\n\r\n\r\nfec2 = FilteredElementCollector(doc).WherePasses(levelFilt).WherePasses(catFilt).ToElements()\r\n\r\n\r\n\r\nTransactionManager.Instance.TransactionTaskDone()\r\n\r\nOUT = fec2",
+      "Engine": "CPython3",
+      "VariableInputPorts": true,
+      "Id": "05b26dc7adc146b98c0680f1b23c07db",
+      "NodeType": "PythonScriptNode",
+      "Inputs": [
+        {
+          "Id": "816ed6aa4fe04eae883b32a3fdf084f4",
+          "Name": "IN[0]",
+          "Description": "Input #0",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "de9fdc78d6974cfca475d0eca7346d0b",
+          "Name": "OUT",
+          "Description": "Result of the python script",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Runs an embedded Python script."
+    }
+  ],
+  "Connectors": [],
+  "Dependencies": [],
+  "NodeLibraryDependencies": [],
+  "EnableLegacyPolyCurveBehavior": null,
+  "Thumbnail": "",
+  "GraphDocumentationURL": null,
+  "ExtensionWorkspaceData": [
+    {
+      "ExtensionGuid": "28992e1d-abb9-417f-8b1b-05e053bee670",
+      "Name": "Properties",
+      "Version": "3.3",
+      "Data": {}
+    },
+    {
+      "ExtensionGuid": "DFBD9CC0-DB40-457A-939E-8C8555555A9D",
+      "Name": "Generative Design",
+      "Version": "8.2",
+      "Data": {}
+    }
+  ],
+  "Author": "",
+  "Linting": {
+    "activeLinter": "None",
+    "activeLinterId": "7b75fb44-43fd-4631-a878-29f4d5d8399a",
+    "warningCount": 0,
+    "errorCount": 0
+  },
+  "Bindings": [],
+  "View": {
+    "Dynamo": {
+      "ScaleFactor": 1.0,
+      "HasRunWithoutCrash": true,
+      "IsVisibleInDynamoLibrary": true,
+      "Version": "3.3.0.6316",
+      "RunType": "Manual",
+      "RunPeriod": "1000"
+    },
+    "Camera": {
+      "Name": "_Background Preview",
+      "EyeX": -17.0,
+      "EyeY": 24.0,
+      "EyeZ": 50.0,
+      "LookX": 12.0,
+      "LookY": -13.0,
+      "LookZ": -58.0,
+      "UpX": 0.0,
+      "UpY": 1.0,
+      "UpZ": 0.0
+    },
+    "ConnectorPins": [],
+    "NodeViews": [
+      {
+        "Id": "05b26dc7adc146b98c0680f1b23c07db",
+        "Name": "Python Script",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 413.87622176289204,
+        "Y": 288.7197073859647
+      }
+    ],
+    "Annotations": [],
+    "X": -277.14694337261267,
+    "Y": -160.95410852701036,
+    "Zoom": 1.418036847216067
+  }
+}

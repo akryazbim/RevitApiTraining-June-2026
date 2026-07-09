@@ -1,0 +1,198 @@
+{
+  "Uuid": "60870c92-0c8c-4820-bf4a-d644abdcd297",
+  "IsCustomNode": false,
+  "Description": "",
+  "Name": "Element Modifications",
+  "ElementResolver": {
+    "ResolutionMap": {}
+  },
+  "Inputs": [],
+  "Outputs": [],
+  "Nodes": [
+    {
+      "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
+      "Code": "import clr\r\n\r\nimport sys\r\nsys.path.append('C:\\Program Files (x86)\\IronPython 2.7\\Lib')\r\n\r\nimport System\r\nfrom System.Collections.Generic import *\r\n\r\nclr.AddReference('ProtoGeometry')\r\nfrom Autodesk.DesignScript.Geometry import *\r\n\r\nclr.AddReference(\"RevitNodes\")\r\nimport Revit\r\nclr.ImportExtensions(Revit.Elements)\r\nclr.ImportExtensions(Revit.GeometryConversion)\r\nclr.AddReference(\"RevitServices\")\r\nimport RevitServices\r\nfrom RevitServices.Persistence import DocumentManager \r\nfrom RevitServices.Transactions import TransactionManager \r\n\r\nclr.AddReference(\"RevitAPI\")\r\nclr.AddReference(\"RevitAPIUI\")\r\n\r\nimport Autodesk \r\nfrom Autodesk.Revit.DB import *\r\nfrom Autodesk.Revit.DB.Electrical import *\r\nfrom Autodesk.Revit.UI import *\r\n\r\ndoc = DocumentManager.Instance.CurrentDBDocument\r\nuiapp = DocumentManager.Instance.CurrentUIApplication \r\napp = uiapp.Application \r\nuidoc = uiapp.ActiveUIDocument\r\n\r\ndef tolist(obj1):\r\n\tif isinstance(obj1,(list, tuple, set)): return obj1\r\n\telse: return [obj1]\r\n\r\n#Preparing input from dynamo to revit\r\nele = UnwrapElement(IN[0])\r\ndl = UnwrapElement(IN[1])\r\n\r\n#Do some action in a Transaction\r\n\r\nTransactionManager.Instance.EnsureInTransaction(doc)\r\n\"\"\"\r\ni = 1\r\n\r\nwhile i <= 5:  \r\n    vec = XYZ(i*5000/304.8, 0, 0)  \r\n    ElementTransformUtils.CopyElement(doc, ele.Id, vec)\r\n    i = i + 1\r\n\"\"\"\r\n\r\n\"\"\"\r\nfor i in range(1, 6):\r\n    vec = XYZ(i*5000/304.8, 0, 0)  \r\n    ElementTransformUtils.CopyElement(doc, ele.Id, vec)\r\n\"\"\"\r\n\r\n\"\"\"\r\npublic static void MoveElement(\r\n    Document document,\r\n    ElementId elementToMove,\r\n    XYZ translation\r\n)\"\"\"\r\n\r\n#vec = XYZ(5000/304.8, 0, 0)  \r\n#ElementTransformUtils.MoveElement(doc, ele.Id, vec)\r\n\r\n\"\"\"\r\ncenter = arc.Location.Curve.Center\r\n\r\nele.Location.Point = center\r\n\"\"\"\r\n\r\n\"\"\"\r\npublic static void RotateElement(\r\n    Document document,\r\n    ElementId elementToRotate,\r\n    Line axis,\r\n    double angle\r\n)\"\"\"\r\n\r\n\"\"\"\r\n\r\ncorner = ele.Location.Point\r\n\r\nendPoint = XYZ(corner.X, corner.Y, corner.Z + 10)\r\n\r\naxis = Line.CreateBound(corner, endPoint)\r\n\r\nElementTransformUtils.RotateElement(doc, ele.Id, axis, 45*0.0174533)\r\n\r\n\"\"\"\r\n\r\n\"\"\"\r\npublic static void MirrorElement(\r\n    Document document,\r\n    ElementId elementToMirror,\r\n    Plane plane\r\n)\"\"\"\r\n\r\n\r\norigin = dl.Location.Curve.GetEndPoint(0)\r\n\r\nnormal = XYZ(1,0,0)\r\n\r\nplane = Plane.CreateByNormalAndOrigin(normal, origin)\r\n\r\n\r\nElementTransformUtils.MirrorElement(doc, ele.Id, plane)\r\n\r\n\r\nTransactionManager.Instance.TransactionTaskDone()\r\n\r\nOUT = plane",
+      "Engine": "CPython3",
+      "VariableInputPorts": true,
+      "Id": "80106037a1844e2ba794acb9d7e050bb",
+      "NodeType": "PythonScriptNode",
+      "Inputs": [
+        {
+          "Id": "d105f74a286f4cf6a18a5520f2fb9bfe",
+          "Name": "IN[0]",
+          "Description": "Input #0",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "fe2e183c94af4d009be846c14bb28e80",
+          "Name": "IN[1]",
+          "Description": "Input #1",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "b573c8af5dbb46c8a79e43559f2b397e",
+          "Name": "OUT",
+          "Description": "Result of the python script",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Runs an embedded Python script."
+    },
+    {
+      "ConcreteType": "Dynamo.Nodes.DSModelElementSelection, DSRevitNodesUI",
+      "NodeType": "ExtensionNode",
+      "InstanceId": [
+        "ae2d9ec5-0fa8-416e-b9d6-a8af5c7dd541-00050a84"
+      ],
+      "Id": "9fc6932745494ee5b81fe9a194f03ae1",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "ff01b55005b248dc885659e908a30a9b",
+          "Name": "Element",
+          "Description": "The selected elements.",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Select a model element from the document."
+    },
+    {
+      "ConcreteType": "Dynamo.Nodes.DSModelElementSelection, DSRevitNodesUI",
+      "NodeType": "ExtensionNode",
+      "InstanceId": [
+        "ae2d9ec5-0fa8-416e-b9d6-a8af5c7dd541-00050b0d"
+      ],
+      "Id": "9c5d9ada98e84cfab5b1ffe63730db36",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "7051b25343414a6ab3c94c855d36fb79",
+          "Name": "Element",
+          "Description": "The selected elements.",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Select a model element from the document."
+    }
+  ],
+  "Connectors": [
+    {
+      "Start": "ff01b55005b248dc885659e908a30a9b",
+      "End": "d105f74a286f4cf6a18a5520f2fb9bfe",
+      "Id": "7db8a1820d4b40de9cb68f973c1e97fd",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "7051b25343414a6ab3c94c855d36fb79",
+      "End": "fe2e183c94af4d009be846c14bb28e80",
+      "Id": "cbbd64369cb44eaeab0eb43a29563244",
+      "IsHidden": "False"
+    }
+  ],
+  "Dependencies": [],
+  "NodeLibraryDependencies": [],
+  "EnableLegacyPolyCurveBehavior": null,
+  "Thumbnail": "",
+  "GraphDocumentationURL": null,
+  "ExtensionWorkspaceData": [
+    {
+      "ExtensionGuid": "28992e1d-abb9-417f-8b1b-05e053bee670",
+      "Name": "Properties",
+      "Version": "3.3",
+      "Data": {}
+    },
+    {
+      "ExtensionGuid": "DFBD9CC0-DB40-457A-939E-8C8555555A9D",
+      "Name": "Generative Design",
+      "Version": "8.2",
+      "Data": {}
+    }
+  ],
+  "Author": "",
+  "Linting": {
+    "activeLinter": "None",
+    "activeLinterId": "7b75fb44-43fd-4631-a878-29f4d5d8399a",
+    "warningCount": 0,
+    "errorCount": 0
+  },
+  "Bindings": [],
+  "View": {
+    "Dynamo": {
+      "ScaleFactor": 1.0,
+      "HasRunWithoutCrash": true,
+      "IsVisibleInDynamoLibrary": true,
+      "Version": "3.3.0.6316",
+      "RunType": "Manual",
+      "RunPeriod": "1000"
+    },
+    "Camera": {
+      "Name": "_Background Preview",
+      "EyeX": -17.0,
+      "EyeY": 24.0,
+      "EyeZ": 50.0,
+      "LookX": 12.0,
+      "LookY": -13.0,
+      "LookZ": -58.0,
+      "UpX": 0.0,
+      "UpY": 1.0,
+      "UpZ": 0.0
+    },
+    "ConnectorPins": [],
+    "NodeViews": [
+      {
+        "Id": "80106037a1844e2ba794acb9d7e050bb",
+        "Name": "Python Script",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 782.3478621776743,
+        "Y": 546.5123654121348
+      },
+      {
+        "Id": "9fc6932745494ee5b81fe9a194f03ae1",
+        "Name": "Select Model Element",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 449.3619886477081,
+        "Y": 479.213280528022
+      },
+      {
+        "Id": "9c5d9ada98e84cfab5b1ffe63730db36",
+        "Name": "Select Model Element",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 378.4940557106078,
+        "Y": 674.3243617156083
+      }
+    ],
+    "Annotations": [],
+    "X": -828.9299197112136,
+    "Y": -679.5863120798538,
+    "Zoom": 1.6653709841407718
+  }
+}

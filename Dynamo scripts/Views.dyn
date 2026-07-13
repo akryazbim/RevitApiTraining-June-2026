@@ -1,0 +1,263 @@
+{
+  "Uuid": "fa5c0730-e915-47f2-90a1-95079001385a",
+  "IsCustomNode": false,
+  "Description": "",
+  "Name": "Views",
+  "ElementResolver": {
+    "ResolutionMap": {}
+  },
+  "Inputs": [],
+  "Outputs": [],
+  "Nodes": [
+    {
+      "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
+      "Code": "import clr\r\n\r\nimport sys\r\nsys.path.append('C:\\Program Files (x86)\\IronPython 2.7\\Lib')\r\n\r\nimport System\r\nfrom System.Collections.Generic import *\r\n\r\nclr.AddReference('ProtoGeometry')\r\nfrom Autodesk.DesignScript.Geometry import *\r\n\r\nclr.AddReference(\"RevitNodes\")\r\nimport Revit\r\nclr.ImportExtensions(Revit.Elements)\r\nclr.ImportExtensions(Revit.GeometryConversion)\r\nclr.AddReference(\"RevitServices\")\r\nimport RevitServices\r\nfrom RevitServices.Persistence import DocumentManager \r\nfrom RevitServices.Transactions import TransactionManager \r\n\r\nclr.AddReference(\"RevitAPI\")\r\nclr.AddReference(\"RevitAPIUI\")\r\n\r\nimport Autodesk \r\nfrom Autodesk.Revit.DB import *\r\nfrom Autodesk.Revit.DB.Electrical import *\r\nfrom Autodesk.Revit.UI import *\r\n\r\ndoc = DocumentManager.Instance.CurrentDBDocument\r\nuiapp = DocumentManager.Instance.CurrentUIApplication \r\napp = uiapp.Application \r\nuidoc = uiapp.ActiveUIDocument\r\n\r\ndef tolist(obj1):\r\n\tif isinstance(obj1,(list, tuple, set)): return obj1\r\n\telse: return [obj1]\r\n\r\n#Preparing input from dynamo to revit\r\nelement = UnwrapElement(IN[0])\r\n\r\n#Do some action in a Transaction\r\n\r\nTransactionManager.Instance.EnsureInTransaction(doc)\r\n\r\n\r\nviews = FilteredElementCollector(doc).OfClass(View).ToElements()\r\n\r\n#doc.ActiveView.CropBoxActive = True\r\nplanViews = FilteredElementCollector(doc).OfClass(View3D).ToElements()\r\n\r\n\r\n\"\"\"\r\npublic static ViewPlan Create(\r\n    Document document,\r\n    ElementId viewFamilyTypeId,\r\n    ElementId levelId\r\n)\"\"\"\r\n\r\n\r\nvfts = FilteredElementCollector(doc).OfClass(ViewFamilyType).ToElements()\r\n\r\n\r\nfor vft in vfts:\r\n    if vft.ViewFamily == ViewFamily.FloorPlan:\r\n        floorPlanType = vft\r\n\r\n\r\nlevels = FilteredElementCollector(doc).OfClass(Level).ToElements()\r\n\r\nlevel0 = [i for i in levels if i.Name == \"Level 0\"][0]\r\n\r\nlevelsToCreate = [ \"Level 0\", \"Level 1\" ]\r\nviewNames = [\"Iron Man\", \"Bat Man\"]\r\n\r\n\r\n\"\"\"\r\nfor level in levels:\r\n    newFloorPlan = ViewPlan.Create(doc, floorPlanType.Id, level.Id)\r\n    newFloorPlan.Name = \"Ashim's View-\"+level.Name\r\n\r\n#level = [i for i in levels if i.Name == levelToCreate][0]\r\n\r\nfor levelToCreate, viewName in zip(levelsToCreate,viewNames) :\r\n    for level in levels:\r\n        if level.Name == levelToCreate:\r\n            newFloorPlan = ViewPlan.Create(doc, floorPlanType.Id, level.Id)\r\n            newFloorPlan.Name = viewName\r\n\"\"\"\r\n\r\n\"\"\"\r\npublic static ViewSheet Create(\r\n    Document document,\r\n    ElementId titleBlockTypeId\r\n)\"\"\"\r\n\r\n\r\nttBlockTypes = FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_TitleBlocks).WhereElementIsElementType().ToElements()\r\n\r\n\r\nfor tt in ttBlockTypes:\r\n    if tt.LookupParameter(\"Type Name\").AsString() == \"Standard\":\r\n        myTt = tt\r\n\r\n\r\n\r\n\"\"\"\r\npublic static Viewport Create(\r\n    Document document,\r\n    ElementId viewSheetId,\r\n    ElementId viewId,\r\n    XYZ point\r\n)\"\"\"\r\n\r\n\"\"\"\r\nsheets = FilteredElementCollector(doc).OfClass(ViewSheet).ToElements()\r\n\r\nfor sheet in sheets:\r\n    if sheet.Name == \"Ronak\" and sheet.SheetNumber == \"07\":\r\n        mySheet = sheet\r\n\r\n\r\nplans = FilteredElementCollector(doc).OfClass(ViewPlan).ToElements()\r\n\r\nfor plan in plans:\r\n    if plan.Name == \"Bat Man\":\r\n        myPlan = plan\r\n        \r\n        \r\nnewViewPort = Viewport.Create(doc, mySheet.Id, myPlan.Id, XYZ(1,1,0))\r\n\"\"\"\r\n\r\n\r\n\r\n\r\nsheetNames = IN[0]\r\nsheetNumbers = IN[1]\r\nttNames = IN[2]\r\nviewNames = IN[3]\r\n\r\nplans = FilteredElementCollector(doc).OfClass(ViewPlan).ToElements()\r\n\r\nfor name, number, ttName, viewName in zip(sheetNames, sheetNumbers, ttNames, viewNames): \r\n   for tt in ttBlockTypes:\r\n    if tt.LookupParameter(\"Type Name\").AsString() == ttName:\r\n        myTt = tt\r\n    newSheet = ViewSheet.Create(doc, myTt.Id)\r\n    newSheet.Name = name\r\n    newSheet.SheetNumber = number\r\n    for plan in plans:\r\n        if plan.Name == viewName:\r\n            myPlan = plan\r\n    newViewPort = Viewport.Create(doc, newSheet.Id, myPlan.Id, XYZ(1,1,0))\r\n    \r\n\r\n\r\n\r\nTransactionManager.Instance.TransactionTaskDone()\r\n\r\nOUT = newViewPort",
+      "Engine": "CPython3",
+      "VariableInputPorts": true,
+      "Id": "b4246163c9dc494fb6bf2e4bfd95bf26",
+      "NodeType": "PythonScriptNode",
+      "Inputs": [
+        {
+          "Id": "09a87ba1eeee4135aeeb21b28781e847",
+          "Name": "IN[0]",
+          "Description": "Input #0",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "2e2ca049838e49b092b0a81f2531c42b",
+          "Name": "IN[1]",
+          "Description": "Input #1",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "1c0a84fba5bd4c41a5abbf9cb0393f24",
+          "Name": "IN[2]",
+          "Description": "Input #2",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "8f9360cdd69d44ad823e7dc617d08951",
+          "Name": "IN[3]",
+          "Description": "Input #3",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "ed441df84b3f4b92917756e80ede6930",
+          "Name": "OUT",
+          "Description": "Result of the python script",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Runs an embedded Python script."
+    },
+    {
+      "ConcreteType": "Dynamo.Graph.Nodes.CodeBlockNodeModel, DynamoCore",
+      "Id": "64f60bf93e644b9683c93b0b9e713a37",
+      "NodeType": "CodeBlockNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "a8363172546d4ad0a53de97621c8b20b",
+          "Name": "",
+          "Description": "Value of expression at line 1",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "28d07b7bea7e42dfa244d770547cb074",
+          "Name": "",
+          "Description": "Value of expression at line 2",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "61c69588af814e56aac9f7087cc3d26b",
+          "Name": "",
+          "Description": "Value of expression at line 3",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "fed131fed9514ec1a33437f883e3fbb4",
+          "Name": "",
+          "Description": "Value of expression at line 4",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Allows for DesignScript code to be authored directly",
+      "Code": "[\"Sheet 1\", \"Sheet 2\", \"Sheet 3\"];\n[\"S01\", \"S02\", \"S03\"];\n[\"Standard\", \"Standard\", \"Standard\"];\n[\"Iron Man\", \"Bat Man\", \"Spider Man\"];"
+    },
+    {
+      "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
+      "Code": "import clr\r\n\r\nimport sys\r\nsys.path.append('C:\\Program Files (x86)\\IronPython 2.7\\Lib')\r\n\r\nimport System\r\nfrom System.Collections.Generic import *\r\n\r\nclr.AddReference('ProtoGeometry')\r\nfrom Autodesk.DesignScript.Geometry import *\r\n\r\nclr.AddReference(\"RevitNodes\")\r\nimport Revit\r\nclr.ImportExtensions(Revit.Elements)\r\nclr.ImportExtensions(Revit.GeometryConversion)\r\nclr.AddReference(\"RevitServices\")\r\nimport RevitServices\r\nfrom RevitServices.Persistence import DocumentManager \r\nfrom RevitServices.Transactions import TransactionManager \r\n\r\nclr.AddReference(\"RevitAPI\")\r\nclr.AddReference(\"RevitAPIUI\")\r\n\r\nimport Autodesk \r\nfrom Autodesk.Revit.DB import *\r\nfrom Autodesk.Revit.DB.Electrical import *\r\nfrom Autodesk.Revit.UI import *\r\n\r\ndoc = DocumentManager.Instance.CurrentDBDocument\r\nuiapp = DocumentManager.Instance.CurrentUIApplication \r\napp = uiapp.Application \r\nuidoc = uiapp.ActiveUIDocument\r\n\r\ndef tolist(obj1):\r\n\tif isinstance(obj1,(list, tuple, set)): return obj1\r\n\telse: return [obj1]\r\n\r\n#Preparing input from dynamo to revit\r\nelement = UnwrapElement(IN[0])\r\n\r\n#Do some action in a Transaction\r\n\r\nTransactionManager.Instance.EnsureInTransaction(doc)\r\n\r\nview = doc.ActiveView\r\n\r\ncatId = ElementId(BuiltInCategory.OST_Walls)\r\n\r\n#view.SetCategoryHidden(catId, False)\r\n\r\n\r\nplans = FilteredElementCollector(doc).OfClass(ViewPlan).ToElements()\r\n\r\nsections = FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Viewers).WhereElementIsNotElementType().ToElements()\r\n\r\nfor section in sections:\r\n    if section.Name == \"To be hidden\":\r\n        hideSection = section\r\n\r\n\r\nsectionList = List[ElementId]()\r\n#sectionList.Add(ElementId(317567))\r\nsectionList.Add(hideSection.Id)\r\n\r\nfor plan in plans:\r\n    if plan.Name == \"Bat Man\":\r\n        continue\r\n    plan.HideElements(sectionList)\r\n\r\n\r\n\r\n\r\nTransactionManager.Instance.TransactionTaskDone()\r\n\r\nOUT = hideSection.Id",
+      "Engine": "CPython3",
+      "VariableInputPorts": true,
+      "Id": "c8b70b6352f046578762826c8fec0bba",
+      "NodeType": "PythonScriptNode",
+      "Inputs": [
+        {
+          "Id": "767d8ad9de0c461b9005fffa85cc332c",
+          "Name": "IN[0]",
+          "Description": "Input #0",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "a86a3c12443c4aec918c092362524322",
+          "Name": "OUT",
+          "Description": "Result of the python script",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Runs an embedded Python script."
+    }
+  ],
+  "Connectors": [
+    {
+      "Start": "a8363172546d4ad0a53de97621c8b20b",
+      "End": "09a87ba1eeee4135aeeb21b28781e847",
+      "Id": "1b89085da09c436898d574289fb9d478",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "28d07b7bea7e42dfa244d770547cb074",
+      "End": "2e2ca049838e49b092b0a81f2531c42b",
+      "Id": "c69cd5611aa8492f9709c7cfe2f09326",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "61c69588af814e56aac9f7087cc3d26b",
+      "End": "1c0a84fba5bd4c41a5abbf9cb0393f24",
+      "Id": "76cfa19a0f6c42999fa0c8556b101962",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "fed131fed9514ec1a33437f883e3fbb4",
+      "End": "8f9360cdd69d44ad823e7dc617d08951",
+      "Id": "4de3f74ac26f4103b787610bd2470edd",
+      "IsHidden": "False"
+    }
+  ],
+  "Dependencies": [],
+  "NodeLibraryDependencies": [],
+  "EnableLegacyPolyCurveBehavior": null,
+  "Thumbnail": "",
+  "GraphDocumentationURL": null,
+  "ExtensionWorkspaceData": [
+    {
+      "ExtensionGuid": "28992e1d-abb9-417f-8b1b-05e053bee670",
+      "Name": "Properties",
+      "Version": "3.3",
+      "Data": {}
+    },
+    {
+      "ExtensionGuid": "DFBD9CC0-DB40-457A-939E-8C8555555A9D",
+      "Name": "Generative Design",
+      "Version": "8.2",
+      "Data": {}
+    }
+  ],
+  "Author": "",
+  "Linting": {
+    "activeLinter": "None",
+    "activeLinterId": "7b75fb44-43fd-4631-a878-29f4d5d8399a",
+    "warningCount": 0,
+    "errorCount": 0
+  },
+  "Bindings": [],
+  "View": {
+    "Dynamo": {
+      "ScaleFactor": 1.0,
+      "HasRunWithoutCrash": true,
+      "IsVisibleInDynamoLibrary": true,
+      "Version": "3.3.0.6316",
+      "RunType": "Manual",
+      "RunPeriod": "1000"
+    },
+    "Camera": {
+      "Name": "_Background Preview",
+      "EyeX": -17.0,
+      "EyeY": 24.0,
+      "EyeZ": 50.0,
+      "LookX": 12.0,
+      "LookY": -13.0,
+      "LookZ": -58.0,
+      "UpX": 0.0,
+      "UpY": 1.0,
+      "UpZ": 0.0
+    },
+    "ConnectorPins": [],
+    "NodeViews": [
+      {
+        "Id": "b4246163c9dc494fb6bf2e4bfd95bf26",
+        "Name": "Python Script",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": true,
+        "ShowGeometry": true,
+        "X": 597.2415644175918,
+        "Y": 465.17531674456364
+      },
+      {
+        "Id": "64f60bf93e644b9683c93b0b9e713a37",
+        "Name": "Code Block",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 135.82411751498182,
+        "Y": 485.5946506588985
+      },
+      {
+        "Id": "c8b70b6352f046578762826c8fec0bba",
+        "Name": "Python Script",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 997.4700188393967,
+        "Y": 516.4684881215919
+      }
+    ],
+    "Annotations": [],
+    "X": -171.9685423259807,
+    "Y": -84.34597819877393,
+    "Zoom": 0.9772206013415274
+  }
+}

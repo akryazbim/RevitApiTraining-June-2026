@@ -1,0 +1,282 @@
+{
+  "Uuid": "027a64d6-2d54-4a96-99ad-8cc2da517851",
+  "IsCustomNode": false,
+  "Description": "",
+  "Name": "Ray Trace",
+  "ElementResolver": {
+    "ResolutionMap": {}
+  },
+  "Inputs": [],
+  "Outputs": [],
+  "Nodes": [
+    {
+      "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
+      "Code": "# ==========================\r\n# IMPORTS\r\n# ==========================\r\n\r\nimport clr\r\nimport sys\r\n\r\n# Revit API\r\nclr.AddReference(\"RevitAPI\")\r\nfrom Autodesk.Revit.DB import *\r\nfrom Autodesk.Revit.UI import *\r\n\r\n# Optional Namespaces\r\nfrom Autodesk.Revit.DB.Architecture import *\r\nfrom Autodesk.Revit.DB.Structure import *\r\n\r\n# Dynamo Services\r\nclr.AddReference(\"RevitServices\")\r\nfrom RevitServices.Persistence import DocumentManager\r\nfrom RevitServices.Transactions import TransactionManager\r\n\r\nclr.AddReference(\"System\")\r\nfrom System.Collections.Generic import List\r\n\r\n# Dynamo Geometry (Only if needed)\r\nclr.AddReference(\"ProtoGeometry\")\r\nfrom Autodesk.DesignScript.Geometry import *\r\n\r\n# ==========================\r\n# DOCUMENTS\r\n# ==========================\r\n\r\ndoc = DocumentManager.Instance.CurrentDBDocument\r\nuiapp = DocumentManager.Instance.CurrentUIApplication\r\nuidoc = uiapp.ActiveUIDocument\r\napp = uiapp.Application\r\n\r\n# ==========================\r\n# INPUTS\r\n# ==========================\r\n\r\ndata = IN[0]\r\n\r\n# ==========================\r\n# CODE\r\n# ==========================\r\nimport os\r\n\r\nbaseFolder = r\"C:\\Users\\v.aditya\\Projects\\Architecture\"\r\npdfFolder = os.path.join(baseFolder, \"PDF\")\r\ndwgFolder = os.path.join(baseFolder, \"DWG\")\r\n\r\n\r\nos.makedirs(pdfFolder, exist_ok=True)\r\nos.makedirs(dwgFolder, exist_ok=True)\r\n\r\n\r\npdfops = PDFExportOptions()\r\npdfops.Combine = True\r\ndwgops = DWGExportOptions()\r\ndwgops.MergedViews = True\r\n\r\nviewSheets = FilteredElementCollector(doc).OfClass(ViewSheet).ToElements()\r\n\r\nfor viewSheet in viewSheets:\r\n    sheetList = List[ElementId]()\r\n    sheetList.Add(viewSheet.Id)\r\n    if \"Floor Plan\" in viewSheet.Name:\r\n        name = pdfops.FileName = \"Level\"+viewSheet.SheetNumber+\"-\"+viewSheet.Name\r\n        pdfs = doc.Export(pdfFolder, sheetList, pdfops)\r\n        dwgs = doc.Export(dwgFolder, name, sheetList, dwgops)\r\n\r\n# ==========================\r\n# OUTPUT\r\n# ==========================\r\n\r\n\r\n\r\nOUT = a",
+      "Engine": "CPython3",
+      "VariableInputPorts": true,
+      "Id": "16c0738cedff4016a84d82fd481815d8",
+      "NodeType": "PythonScriptNode",
+      "Inputs": [
+        {
+          "Id": "5dc9f747ed7042f1abd36921ee7f2420",
+          "Name": "IN[0]",
+          "Description": "Input #0",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "16e56c3e4fdf4dc2a8533bd4d5f04efd",
+          "Name": "OUT",
+          "Description": "Result of the python script",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Runs an embedded Python script."
+    },
+    {
+      "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
+      "Code": "# ==========================\r\n# IMPORTS\r\n# ==========================\r\n\r\nimport clr\r\nimport sys\r\n\r\n# Revit API\r\nclr.AddReference(\"RevitAPI\")\r\nfrom Autodesk.Revit.DB import *\r\nfrom Autodesk.Revit.UI import *\r\n\r\n# Namespaces\r\nfrom Autodesk.Revit.DB.Architecture import *\r\nfrom Autodesk.Revit.DB.Structure import *\r\n\r\n# Dynamo Services\r\nclr.AddReference(\"RevitServices\")\r\nfrom RevitServices.Persistence import DocumentManager\r\nfrom RevitServices.Transactions import TransactionManager\r\n\r\nclr.AddReference(\"System\")\r\nfrom System.Collections.Generic import List\r\n\r\n# Dynamo Geometry (Only if needed)\r\nclr.AddReference(\"ProtoGeometry\")\r\nfrom Autodesk.DesignScript.Geometry import *\r\n\r\n# ==========================\r\n# DOCUMENTS\r\n# ==========================\r\n\r\ndoc = DocumentManager.Instance.CurrentDBDocument\r\nuiapp = DocumentManager.Instance.CurrentUIApplication\r\nuidoc = uiapp.ActiveUIDocument\r\napp = uiapp.Application\r\n\r\n# ==========================\r\n# INPUTS\r\n# ==========================\r\n\r\ndata = IN[0]\r\n\r\n# ==========================\r\n# CODE\r\n# ==========================\r\n\r\nimport os\r\n\r\nbaseFolder = r\"C:\\Users\\v.aditya\\Projects\\aDi\"\r\nproject = \"Sobha One\"\r\ndisciplines =  [\"Architecture\", \"Structure\", \"Mechanical\", \"Electrical\"]\r\nformateFolders = [\"01. PDF\",\"02. CAD\",\"03. NWC\", \"04. IFC\"]\r\n\r\nprojectFolder = os.path.join(baseFolder, project)\r\nos.mkdir(projectFolder)\r\n\r\ntemp = []\r\n\r\nfor discipline in disciplines:\r\n    disciplinefolder = os.path.join(projectFolder, discipline)\r\n    os.mkdir(disciplinefolder)\r\n    for formateFolder in formateFolders:\r\n        formateFolder = os.path.join(disciplinefolder, formateFolder)\r\n        os.mkdir(formateFolder)\r\n        temp.append(formateFolder)\r\n\r\n\r\n# ==========================\r\n# OUTPUT\r\n# ==========================\r\n\r\nOUT = temp",
+      "Engine": "CPython3",
+      "VariableInputPorts": true,
+      "Id": "565822c58de4460d822391b50485d45c",
+      "NodeType": "PythonScriptNode",
+      "Inputs": [
+        {
+          "Id": "e4131d367ffc4616b7eb8c46b7c9d22a",
+          "Name": "IN[0]",
+          "Description": "Input #0",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "a13b959f5d9049aab123734353514c7c",
+          "Name": "OUT",
+          "Description": "Result of the python script",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Runs an embedded Python script."
+    },
+    {
+      "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
+      "Code": "# ==========================\r\n# IMPORTS\r\n# ==========================\r\n\r\nimport clr\r\nimport sys\r\n\r\nsys.path.append(r'C:\\Program Files (x86)\\IronPython 2.7\\Lib')\r\n\r\nfrom System import*\r\nfrom System.Collections.Generic import *\r\n\r\nclr.AddReference('ProtoGeometry')\r\nfrom Autodesk.DesignScript.Geometry import *\r\n\r\nclr.AddReference(\"RevitNodes\")\r\nimport Revit\r\nclr.ImportExtensions(Revit.Elements)\r\nclr.ImportExtensions(Revit.GeometryConversion)\r\nclr.AddReference(\"RevitServices\")\r\nimport RevitServices\r\nfrom RevitServices.Persistence import DocumentManager \r\nfrom RevitServices.Transactions import TransactionManager \r\n\r\nclr.AddReference(\"RevitAPI\")\r\nclr.AddReference(\"RevitAPIUI\")\r\n\r\nimport Autodesk \r\nfrom Autodesk.Revit.DB import *\r\nfrom Autodesk.Revit.DB.Structure import *\r\nfrom Autodesk.Revit.DB.Mechanical import *\r\nfrom Autodesk.Revit.DB.Electrical import *\r\nfrom Autodesk.Revit.DB.Plumbing import *\r\n\r\nfrom Autodesk.Revit.UI import *\r\n\r\n# ==========================\r\n# DOCUMENTS\r\n# ==========================\r\n\r\ndoc = DocumentManager.Instance.CurrentDBDocument\r\nuiapp = DocumentManager.Instance.CurrentUIApplication \r\napp = uiapp.Application \r\nuidoc = uiapp.ActiveUIDocument\r\n\r\ndef tolist(obj1):\r\n    if isinstance(obj1,(list, tuple, set)): return obj1\r\n    else: return [obj1]\r\n# ==========================\r\n# INPUTS\r\n# ==========================\r\n\r\ndl = UnwrapElement(IN[0])\r\n\r\nTransactionManager.Instance.EnsureInTransaction(doc)\r\n\r\norigin = dl.Location.Curve.Center\r\n\r\npt = XYZ(origin.X, origin.Y, origin.Z+0.6)\r\n\r\ndir = XYZ(1,0,0)\r\n\r\nviews = FilteredElementCollector(doc).OfClass(View3D).ToElements()\r\n\r\nfor view in views:\r\n    if view.Name == \"{3D}\":\r\n        myView = view\r\n        \r\n\"\"\"\r\npublic ReferenceIntersector(\r\n    ElementFilter filter,\r\n    FindReferenceTarget targetType,\r\n    View3D view3d\r\n)\"\"\"\r\n\r\ncatFilt = ElementCategoryFilter(BuiltInCategory.OST_Walls)\r\n\r\nri = ReferenceIntersector(catFilt, FindReferenceTarget.Element, myView)\r\n\r\nhit = ri.FindNearest(pt, dir)\r\n\r\ndistance = hit.Proximity\r\n\r\nref = hit.GetReference()\r\n\r\nhitPoint = ref.GlobalPoint\r\n\r\nele = doc.GetElement(ref.ElementId)\r\n\r\n\r\nhits = ri.Find(pt, dir)\r\n\r\nelements = []\r\n\r\nfor h in hits:\r\n    distance = h.Proximity\r\n    ref = h.GetReference()\r\n    \r\n    hitPoint = ref.GlobalPoint\r\n    \r\n    ele = doc.GetElement(ref.ElementId)\r\n    elements.append(hitPoint.ToPoint()) \r\n\r\n\r\n\r\ndl2 = UnwrapElement(IN[1])\r\n\r\nbotPoint = dl2.Location.Curve.Center\r\n\r\ncatFilt = ElementCategoryFilter(BuiltInCategory.OST_Ceilings)\r\n\r\nri = ReferenceIntersector(catFilt, FindReferenceTarget.Element, myView)\r\n\r\nhit = ri.FindNearest(botPoint, XYZ(0,0,1))\r\n\r\ndistance = hit.Proximity\r\n\r\nref = hit.GetReference()\r\n\r\nhitPoint = ref.GlobalPoint\r\n\r\nele = doc.GetElement(ref.ElementId)\r\n\r\n\"\"\"public FamilyInstance NewFamilyInstance(\r\n    XYZ location,\r\n    FamilySymbol symbol,\r\n    Element host,\r\n    Level level,\r\n    StructuralType structuralType\r\n)\"\"\"\r\n\r\n\r\nlightingTypes = FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_LightingFixtures).WhereElementIsElementType().ToElements()\r\n\r\nfor lt in lightingTypes:\r\n    if lt.LookupParameter(\"Type Name\").AsString() == \"100W - 230V\":\r\n        ceilingLt = lt\r\n\r\nlevel = doc.GetElement(ele.LevelId)\r\n\r\nif ceilingLt.IsActive == False:\r\n    ceilingLt.Activate()\r\n\r\n\r\nnewLight = doc.Create.NewFamilyInstance(hitPoint, ceilingLt, ele, level, StructuralType.NonStructural)\r\n\r\nTransactionManager.Instance.TransactionTaskDone()\r\n\r\nOUT = newLight",
+      "Engine": "CPython3",
+      "VariableInputPorts": true,
+      "Id": "a665f95398274ec79424d389ab7c10a9",
+      "NodeType": "PythonScriptNode",
+      "Inputs": [
+        {
+          "Id": "10de07be351c455491f989b0d97c8b6d",
+          "Name": "IN[0]",
+          "Description": "Input #0",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "08340abedbe04f43baadbe18e48d8759",
+          "Name": "IN[1]",
+          "Description": "Input #1",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "23193c91e67944c49c44d100eea6ff10",
+          "Name": "OUT",
+          "Description": "Result of the python script",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Runs an embedded Python script."
+    },
+    {
+      "ConcreteType": "Dynamo.Nodes.DSModelElementSelection, DSRevitNodesUI",
+      "NodeType": "ExtensionNode",
+      "InstanceId": [
+        "ee29ae74-e7cf-4b0a-803f-4cd8c843ade0-0004e50b"
+      ],
+      "Id": "b50a02bce661486ea86d8db72dfd3010",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "6f4e060787dd4dc5add08b8443db493a",
+          "Name": "Element",
+          "Description": "The selected elements.",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Select a model element from the document."
+    },
+    {
+      "ConcreteType": "Dynamo.Nodes.DSModelElementSelection, DSRevitNodesUI",
+      "NodeType": "ExtensionNode",
+      "InstanceId": [
+        "ee29ae74-e7cf-4b0a-803f-4cd8c843ade0-0004e709"
+      ],
+      "Id": "5b9e0fcf084a42648d307f85ce83b98a",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "04cf455d48a64e348979ccdfa61289ff",
+          "Name": "Element",
+          "Description": "The selected elements.",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Select a model element from the document."
+    }
+  ],
+  "Connectors": [
+    {
+      "Start": "6f4e060787dd4dc5add08b8443db493a",
+      "End": "10de07be351c455491f989b0d97c8b6d",
+      "Id": "a2a416e67e2447d48c405edbc7512897",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "04cf455d48a64e348979ccdfa61289ff",
+      "End": "08340abedbe04f43baadbe18e48d8759",
+      "Id": "01566ddff9954cd990e89e7343da17de",
+      "IsHidden": "False"
+    }
+  ],
+  "Dependencies": [],
+  "NodeLibraryDependencies": [],
+  "EnableLegacyPolyCurveBehavior": true,
+  "Thumbnail": "",
+  "GraphDocumentationURL": null,
+  "ExtensionWorkspaceData": [
+    {
+      "ExtensionGuid": "28992e1d-abb9-417f-8b1b-05e053bee670",
+      "Name": "Properties",
+      "Version": "3.3",
+      "Data": {}
+    },
+    {
+      "ExtensionGuid": "DFBD9CC0-DB40-457A-939E-8C8555555A9D",
+      "Name": "Generative Design",
+      "Version": "8.2",
+      "Data": {}
+    }
+  ],
+  "Author": "",
+  "Linting": {
+    "activeLinter": "None",
+    "activeLinterId": "7b75fb44-43fd-4631-a878-29f4d5d8399a",
+    "warningCount": 0,
+    "errorCount": 0
+  },
+  "Bindings": [],
+  "View": {
+    "Dynamo": {
+      "ScaleFactor": 1.0,
+      "HasRunWithoutCrash": true,
+      "IsVisibleInDynamoLibrary": true,
+      "Version": "3.3.0.6316",
+      "RunType": "Manual",
+      "RunPeriod": "1000"
+    },
+    "Camera": {
+      "Name": "_Background Preview",
+      "EyeX": -17.0,
+      "EyeY": 24.0,
+      "EyeZ": 50.0,
+      "LookX": 12.0,
+      "LookY": -13.0,
+      "LookZ": -58.0,
+      "UpX": 0.0,
+      "UpY": 1.0,
+      "UpZ": 0.0
+    },
+    "ConnectorPins": [],
+    "NodeViews": [
+      {
+        "Id": "16c0738cedff4016a84d82fd481815d8",
+        "Name": "Adithya's code",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": true,
+        "ShowGeometry": true,
+        "X": 240.91395171944674,
+        "Y": 499.09271657202703
+      },
+      {
+        "Id": "565822c58de4460d822391b50485d45c",
+        "Name": "Nested folders creation",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": true,
+        "ShowGeometry": true,
+        "X": 233.84566218762137,
+        "Y": 286.57593696138997
+      },
+      {
+        "Id": "a665f95398274ec79424d389ab7c10a9",
+        "Name": "Python Script",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 1069.8539103170458,
+        "Y": 260.57941246794115
+      },
+      {
+        "Id": "b50a02bce661486ea86d8db72dfd3010",
+        "Name": "Select Model Element",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 705.3403133856641,
+        "Y": 205.33299467635476
+      },
+      {
+        "Id": "5b9e0fcf084a42648d307f85ce83b98a",
+        "Name": "Select Model Element",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 662.1243759300601,
+        "Y": 401.63589701706434
+      }
+    ],
+    "Annotations": [],
+    "X": -1253.3995073522622,
+    "Y": 97.56036595108458,
+    "Zoom": 1.4596225598868593
+  }
+}

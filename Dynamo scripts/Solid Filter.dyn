@@ -1,0 +1,415 @@
+{
+  "Uuid": "ca0e97f8-7371-4d91-9f57-eca5996a5fb9",
+  "IsCustomNode": false,
+  "Description": "",
+  "Name": "Solid Filter",
+  "ElementResolver": {
+    "ResolutionMap": {}
+  },
+  "Inputs": [],
+  "Outputs": [],
+  "Nodes": [
+    {
+      "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
+      "Code": "# ==========================\r\n# IMPORTS\r\n# ==========================\r\n\r\n import clr\r\n import sys\r\n\r\n# Revit API\r\n clr.AddReference(\"RevitAPI\")\r\n from Autodesk.Revit.DB import *\r\n from Autodesk.Revit.UI import *\r\n\r\n# Optional Namespaces\r\n from Autodesk.Revit.DB.Architecture import *\r\n from Autodesk.Revit.DB.Structure import *\r\n from Autodesk.Revit.DB.Mechanical import *\r\n from Autodesk.Revit.DB.Plumbing import *\r\n from Autodesk.Revit.DB.Electrical import *\r\n\r\n# Dynamo Services\r\n clr.AddReference(\"RevitServices\")\r\n from RevitServices.Persistence import DocumentManager\r\n from RevitServices.Transactions import TransactionManager\r\n\r\n clr.AddReference(\"System\")\r\n from System import Type\r\n from System.Collections.Generic import List\r\n\r\n# Dynamo Geometry (Only if needed)\r\n clr.AddReference(\"ProtoGeometry\")\r\n from Autodesk.DesignScript.Geometry import *\r\n\r\n# ==========================\r\n# DOCUMENTS\r\n# ==========================\r\n\r\n doc = DocumentManager.Instance.CurrentDBDocument\r\n uiapp = DocumentManager.Instance.CurrentUIApplication\r\n uidoc = uiapp.ActiveUIDocument\r\n app = uiapp.Application\r\n\r\n# ==========================\r\n# INPUTS\r\n# ==========================\r\n\r\n levelNames = UnwrapElement(IN[0])\r\n levelHeights = UnwrapElement(IN[1])\r\n sheetNumbers = UnwrapElement(IN[2])\r\n sheetNames = UnwrapElement(IN[3])\r\n titleBlocks = UnwrapElement(IN[4])\r\n\r\n# ==========================\r\n# CODE\r\n# ==========================\r\nTransactionManager.Instance.EnsureInTransaction(doc)\r\n\r\nlevels = FilteredElementCollector(doc).OfClass(Level)\r\nnames = [level.Name for level in levels] \r\n\r\nviewFamilyTypes = FilteredElementCollector(doc).OfClass(ViewFamilyType).ToElements()\r\ntitleblocks = FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_TitleBlocks).WhereElementIsElementType().ToElements()\r\n\r\ntb = {}\r\n\r\nfor titleblock in titleblocks:\r\n    typeName = titleblock.FamilyName\r\n    tb[typeName] = titleblock\r\n\r\nfor viewFamilyType in viewFamilyTypes:\r\n    if viewFamilyType.LookupParameter(\"Type Name\").AsString() == \"Architectural Plan\":\r\n        vt = viewFamilyType\r\n\r\nfor levelName, levelHeight, sheetNumber, sheetName, titleBlock in zip(levelNames, levelHeights, sheetNumbers, sheetNames, titleBlocks):\r\n    if levelName not in names:\r\n        newLevel = Level.Create(doc, levelHeight/304.8)\r\n        newLevel.Name = levelName\r\n    newView = ViewPlan.Create(doc, vt.Id, newLevel.Id)\r\n    newView.Name = levelName+\" - Architectural\"\r\n    newSheet = ViewSheet.Create(doc, tb[titleBlock].Id)\r\n    newSheet.SheetNumber = sheetNumber\r\n    newSheet.Name = sheetName\r\n    Viewport.Create(doc, newSheet.Id, newView.Id, XYZ(594/304.8, 420/304.8, 0))\r\n\r\nTransactionManager.Instance.TransactionTaskDone() \r\n# ==========================\r\n# OUTPUT\r\n# ==========================\r\n\r\nOUT = tb",
+      "Engine": "CPython3",
+      "VariableInputPorts": true,
+      "Id": "9ed89a1dd73f420ea3a89b1b7c6475eb",
+      "NodeType": "PythonScriptNode",
+      "Inputs": [
+        {
+          "Id": "c619c64e8d76482c9df5a5f9eabb8eee",
+          "Name": "IN[0]",
+          "Description": "Input #0",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "9f0c3fababe24f1b98f7f7bbd901a402",
+          "Name": "OUT",
+          "Description": "Result of the python script",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Runs an embedded Python script."
+    },
+    {
+      "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
+      "Code": "# ==========================\r\n# IMPORTS\r\n# ==========================\r\n\r\nimport clr\r\nimport sys\r\n\r\n# Revit API\r\nclr.AddReference(\"RevitAPI\")\r\nfrom Autodesk.Revit.DB import *\r\nfrom Autodesk.Revit.UI import *\r\n\r\n# Optional Namespaces\r\nfrom Autodesk.Revit.DB.Architecture import *\r\nfrom Autodesk.Revit.DB.Structure import *\r\nfrom Autodesk.Revit.DB.Mechanical import *\r\nfrom Autodesk.Revit.DB.Plumbing import *\r\nfrom Autodesk.Revit.DB.Electrical import *\r\n\r\n# Dynamo Services\r\nclr.AddReference(\"RevitServices\")\r\nfrom RevitServices.Persistence import DocumentManager\r\nfrom RevitServices.Transactions import TransactionManager\r\n\r\nclr.AddReference(\"System\")\r\nfrom System import Type\r\nfrom System.Collections.Generic import List\r\n\r\n# Dynamo Geometry (Only if needed)\r\nclr.AddReference(\"ProtoGeometry\")\r\nfrom Autodesk.DesignScript.Geometry import *\r\n\r\n# ==========================\r\n# DOCUMENTS\r\n# ==========================\r\n\r\ndoc = DocumentManager.Instance.CurrentDBDocument\r\nuiapp = DocumentManager.Instance.CurrentUIApplication\r\nuidoc = uiapp.ActiveUIDocument\r\napp = uiapp.Application\r\n\r\n# ==========================\r\n# INPUTS\r\n# ==========================\r\n\r\nwall = UnwrapElement(IN[0])\r\n\r\n# ==========================\r\n# CODE\r\n# ==========================\r\nTransactionManager.Instance.EnsureInTransaction(doc)\r\n\r\nbb = wall.get_BoundingBox(None)\r\nbbo = Outline(bb.Min, bb.Max)\r\nclashfilter = BoundingBoxIntersectsFilter(bbo)\r\n\r\ncatlist = List[Type]()\r\ncatlist.Add(Duct)\r\ncatlist.Add(Pipe)\r\ncatlist.Add(CableTray)\r\n\r\nelefilter = ElementMulticlassFilter(catlist)\r\n\r\nclashes = FilteredElementCollector(doc).WherePasses(elefilter).WherePasses(clashfilter).ToElements()\r\n\r\neleidlist = List[ElementId]()\r\neleidlist.Add(wall.Id)\r\nfor clash in clashes:\r\n    eleidlist.Add(clash.Id)\r\n\r\nviewFamilyTypes = FilteredElementCollector(doc).OfClass(ViewFamilyType)\r\nfor viewFamilyType in viewFamilyTypes:\r\n    if viewFamilyType.ViewFamily == ViewFamily.ThreeDimensional:\r\n        vt = viewFamilyType\r\n\r\nclashview = View3D.CreateIsometric(doc, vt.Id)\r\nclashview.Name = \"WallvsMEP\"\r\nclashview.IsolateElementsTemporary(eleidlist)\r\n\r\npipes = FilteredElementCollector(doc).OfClass(Pipe).WherePasses(clashfilter).ToElements()\r\n\r\npipesIds = [pipe.Id for pipe in pipes]\r\n\r\nos = OverrideGraphicSettings().SetProjectionLineColor(Color(255,0,0))\r\n\r\nfor pipesId in pipesIds:\r\n    clashview.SetElementOverrides( pipesId, os)\r\n\r\nTransactionManager.Instance.TransactionTaskDone() \r\n# ==========================\r\n# OUTPUT\r\n# ==========================\r\n\r\nOUT = clashview",
+      "Engine": "CPython3",
+      "VariableInputPorts": true,
+      "Id": "6d4778168ea74e2dad2fc17bcd6d6b44",
+      "NodeType": "PythonScriptNode",
+      "Inputs": [
+        {
+          "Id": "369a255382b64672ab03ccbd253b3c51",
+          "Name": "IN[0]",
+          "Description": "Input #0",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "b143229901114cfb9b3d9e30a8272356",
+          "Name": "OUT",
+          "Description": "Result of the python script",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Runs an embedded Python script."
+    },
+    {
+      "ConcreteType": "Dynamo.Nodes.DSModelElementSelection, DSRevitNodesUI",
+      "NodeType": "ExtensionNode",
+      "InstanceId": [
+        "cf97e9f3-211f-4250-be64-25110c2f67af-00050a01"
+      ],
+      "Id": "cbd429b10bf3451ab08b7a7483656ca4",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "37dddd3ee646498fa7ec3dcf0a99d863",
+          "Name": "Element",
+          "Description": "The selected elements.",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Select a model element from the document."
+    },
+    {
+      "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
+      "Code": "import clr\r\n\r\nimport sys\r\nsys.path.append('C:\\Program Files (x86)\\IronPython 2.7\\Lib')\r\n\r\nimport System\r\nfrom System.Collections.Generic import *\r\n\r\nclr.AddReference('ProtoGeometry')\r\nfrom Autodesk.DesignScript.Geometry import *\r\n\r\nclr.AddReference(\"RevitNodes\")\r\nimport Revit\r\nclr.ImportExtensions(Revit.Elements)\r\nclr.ImportExtensions(Revit.GeometryConversion)\r\nclr.AddReference(\"RevitServices\")\r\nimport RevitServices\r\nfrom RevitServices.Persistence import DocumentManager \r\nfrom RevitServices.Transactions import TransactionManager \r\n\r\nclr.AddReference(\"RevitAPI\")\r\nclr.AddReference(\"RevitAPIUI\")\r\n\r\nimport Autodesk \r\nfrom Autodesk.Revit.DB import *\r\nfrom Autodesk.Revit.DB.Electrical import *\r\nfrom Autodesk.Revit.UI import *\r\n\r\ndoc = DocumentManager.Instance.CurrentDBDocument\r\nuiapp = DocumentManager.Instance.CurrentUIApplication \r\napp = uiapp.Application \r\nuidoc = uiapp.ActiveUIDocument\r\n\r\ndef tolist(obj1):\r\n\tif isinstance(obj1,(list, tuple, set)): return obj1\r\n\telse: return [obj1]\r\n\r\n#Preparing input from dynamo to revit\r\nexcelInp = tolist(UnwrapElement(IN[0]))\r\n\r\n#Do some action in a Transaction\r\n\r\nTransactionManager.Instance.EnsureInTransaction(doc)\r\n\r\n\r\n\r\nviews = FilteredElementCollector(doc).OfClass(View).ToElements()\r\n\r\nplans = FilteredElementCollector(doc).OfClass(ViewPlan).ToElements()\r\n\r\n\r\n\"\"\"\r\npublic static ViewPlan Create(\r\n    Document document,\r\n    ElementId viewFamilyTypeId,\r\n    ElementId levelId\r\n)\r\n\"\"\"\r\n\r\nvfts = FilteredElementCollector(doc).OfClass(ViewFamilyType).ToElements()\r\n\r\n\r\nfor vft in vfts:\r\n    if vft.ViewFamily == ViewFamily.FloorPlan:\r\n        floorPlanType = vft\r\n         \r\n     \r\n\r\nlevels = FilteredElementCollector(doc).OfClass(Level).ToElements()\r\n\r\n\"\"\"\"\r\n\r\nfor level in levels:\r\n    if level.Name == \"Level 0\":\r\n        level0 = level\r\n        \r\nfor level in levels:\r\n    newFloorPlan = ViewPlan.Create(doc, floorPlanType.Id, level.Id)\r\n    newFloorPlan.Name = \"Babu's View\" + level.Name\r\n\r\n\"\"\"\r\nrows = excelInp[1:]\r\n\r\nlevelsToCreate = [row[5] for row in rows]\r\nviewNames = [row[3] for row in rows]\r\n#levelsToCreate = [0]\r\n#viewNames = [\"GFPlan\", \"FFPlan\"]\r\n\r\nfor levelToCreate, viewName in zip(levelsToCreate,viewNames):\r\n    level = next((i for i in levels if i.Name == levelToCreate),None)\r\n    if level is None:\r\n        continue\r\n    newFloorPlan = ViewPlan.Create(doc, floorPlanType.Id, level.Id)\r\n    newFloorPlan.Name = viewName+\"_\"+levelToCreate\r\n\r\n\"\"\"\r\n public static ViewSheet Create(\r\n    Document document,\r\n    ElementId titleBlockTypeId\r\n)\r\n\r\n\"\"\"\r\n\r\ntitleBlockTypes = FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_TitleBlocks).WhereElementIsElementType().ToElements()\r\n\r\n\r\nfor ttBlockType in titleBlockTypes:\r\n    if ttBlockType.LookupParameter(\"Type Name\").AsString() == \"Standard\":\r\n        myTt = ttBlockType\r\n        \r\n\r\nsheetNames = [row[0] for row in rows]\r\nsheetNumbers = [row[1] for row in rows]\r\n\r\nfor sheetName, sheetNumber in zip(sheetNames, sheetNumbers):\r\n    newSheet = ViewSheet.Create(doc, myTt.Id)\r\n    newSheet.Name = sheetName\r\n    newSheet.SheetNumber = sheetNumber\r\n\r\n\r\nTransactionManager.Instance.TransactionTaskDone()\r\n\r\nOUT = newSheet\r\n",
+      "Engine": "CPython3",
+      "VariableInputPorts": true,
+      "Id": "0cfcd01115e04c80b30f2c6d54c43bdf",
+      "NodeType": "PythonScriptNode",
+      "Inputs": [
+        {
+          "Id": "83077b8ad7564b47a0abb2ceff22eceb",
+          "Name": "IN[0]",
+          "Description": "Input #0",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "a46c6d6998994e99937cdef367ee5d9e",
+          "Name": "OUT",
+          "Description": "Result of the python script",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Runs an embedded Python script."
+    },
+    {
+      "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
+      "Code": "import clr\r\n\r\nimport sys\r\nsys.path.append('C:\\Program Files (x86)\\IronPython 2.7\\Lib')\r\n\r\nimport System\r\nfrom System.Collections.Generic import *\r\n\r\nclr.AddReference('ProtoGeometry')\r\nfrom Autodesk.DesignScript.Geometry import *\r\n\r\nclr.AddReference(\"RevitNodes\")\r\nimport Revit\r\nclr.ImportExtensions(Revit.Elements)\r\nclr.ImportExtensions(Revit.GeometryConversion)\r\nclr.AddReference(\"RevitServices\")\r\nimport RevitServices\r\nfrom RevitServices.Persistence import DocumentManager \r\nfrom RevitServices.Transactions import TransactionManager \r\n\r\nclr.AddReference(\"RevitAPI\")\r\nclr.AddReference(\"RevitAPIUI\")\r\n\r\nimport Autodesk \r\nfrom Autodesk.Revit.DB import *\r\nfrom Autodesk.Revit.DB.Plumbing import *\r\nfrom Autodesk.Revit.DB.Mechanical import *\r\nfrom Autodesk.Revit.DB.Electrical import *\r\nfrom Autodesk.Revit.UI import *\r\n\r\ndoc = DocumentManager.Instance.CurrentDBDocument\r\nuiapp = DocumentManager.Instance.CurrentUIApplication \r\napp = uiapp.Application \r\nuidoc = uiapp.ActiveUIDocument\r\n\r\ndef tolist(obj1):\r\n\tif isinstance(obj1,(list, tuple, set)): return obj1\r\n\telse: return [obj1]\r\n\r\n#Preparing input from dynamo to revit\r\nwall = UnwrapElement(IN[0])\r\ntype = UnwrapElement(IN[1])\r\n\r\n#Do some action in a Transaction\r\n\r\nTransactionManager.Instance.EnsureInTransaction(doc)\r\n\r\n\r\nbb = wall.get_BoundingBox(None)\r\not = Outline(bb.Min, bb.Max)\r\n\r\nbbFilter = BoundingBoxIntersectsFilter(ot, -0.01)\r\n\r\nclassList = List[System.Type]()\r\nclassList.Add(Pipe)\r\nclassList.Add(Duct)\r\n\r\nclassFilt = ElementMulticlassFilter(classList)\r\n\r\nwallGeo = wall.get_Geometry(Options())\r\nwallSolid = list(wallGeo)[0]\r\n\r\nsolidFilter = ElementIntersectsSolidFilter(wallSolid)\r\n\r\n\r\nclashes = FilteredElementCollector(doc).WherePasses(classFilt).WherePasses(bbFilter).WherePasses(solidFilter).ToElements()\r\n\r\n\r\n\r\n\r\nTransactionManager.Instance.TransactionTaskDone()\r\n\r\nOUT = clashes",
+      "Engine": "CPython3",
+      "VariableInputPorts": true,
+      "Id": "99d54af6be4a427996a9973609e31a41",
+      "NodeType": "PythonScriptNode",
+      "Inputs": [
+        {
+          "Id": "20fec2d56367444fb6f9a2a4b630ea2c",
+          "Name": "IN[0]",
+          "Description": "Input #0",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "f26d3899e71649279ddd2adcad65e3c4",
+          "Name": "IN[1]",
+          "Description": "Input #1",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "6a6bb20c311c41a18001ba2dbce0da24",
+          "Name": "OUT",
+          "Description": "Result of the python script",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Runs an embedded Python script."
+    },
+    {
+      "ConcreteType": "DSRevitNodesUI.WallTypes, DSRevitNodesUI",
+      "SelectedIndex": 0,
+      "SelectedString": "Concrete Wall",
+      "Id": "ad2d45d694204a3eb455fc604ec59c34",
+      "NodeType": "ExtensionNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "44fef66305e44bbab79256e7ac53b70b",
+          "Name": "Wall Type",
+          "Description": "The selected Wall Type",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "All wall types available in the document."
+    },
+    {
+      "ConcreteType": "Dynamo.Nodes.DSModelElementSelection, DSRevitNodesUI",
+      "NodeType": "ExtensionNode",
+      "InstanceId": [
+        "cf97e9f3-211f-4250-be64-25110c2f67af-00050b7d"
+      ],
+      "Id": "377233c83ae74735bafb6d585f097300",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "5813821df6424909a9cee0dfe6d2aeb9",
+          "Name": "Element",
+          "Description": "The selected elements.",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Select a model element from the document."
+    },
+    {
+      "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
+      "Code": "# Standard Dynamo Python Script template\nimport clr\n\nclr.AddReference('RevitAPI')\nclr.AddReference('RevitAPIUI')\nclr.AddReference('RevitServices')\nclr.AddReference('RevitNodes')\n\nfrom Autodesk.Revit.DB import *\nfrom Autodesk.Revit.DB.Plumbing import Pipe, PipeType\nfrom RevitServices.Persistence import DocumentManager\nfrom RevitServices.Transactions import TransactionManager\n\n# Inputs from connected nodes are available via IN list\n# IN[0] - wall (Element)\n# IN[1] - document (Document)\n\ndoc = DocumentManager.Instance.CurrentDBDocument\nuidoc = DocumentManager.Instance.CurrentUIApplication.ActiveUIDocument\n\nwall = UnwrapElement(IN[0])\n\n# Get the wall's solid geometry\nopt = Options()\nopt.ComputeReferences = True\nopt.IncludeNonVisibleObjects = False\nopt.DetailLevel = ViewDetailLevel.Coarse\nopt.IncludeHiddenElements = False\n\ngeomElem = wall.get_Geometry(opt)\n\n# Find the solid from the geometry\nsolid = None\nfor geo in geomElem:\n    if isinstance(geo, Solid):\n        if geo.Volume > 0:\n            solid = geo\n            break\n    elif isinstance(geo, GeometryInstance):\n        inst = geo.GetInstanceGeometry()\n        for g in inst:\n            if isinstance(g, Solid):\n                if g.Volume > 0:\n                    solid = g\n                    break\n\n# Get the bounding box of the wall\nbbox = wall.get_BoundingBox(None)\n\nif bbox is None or solid is None:\n    OUT = []\nelse:\n    # Expand the bounding box by 25mm (0.025 meters)\n    tolerance = 0.025  # 25mm in meters\n    minPt = bbox.Min\n    maxPt = bbox.Max\n    newMin = XYZ(minPt.X - tolerance, minPt.Y - tolerance, minPt.Z - tolerance)\n    newMax = XYZ(maxPt.X + tolerance, maxPt.Y + tolerance, maxPt.Z + tolerance)\n    scaledBbox = BoundingBoxXYZ()\n    scaledBbox.Min = newMin\n    scaledBbox.Max = newMax\n\n    # Create a solid from the scaled bounding box using Solid.CreateBox\n    scaledSolid = Solid.CreateBox(scaledBbox)\n\n    # Create filters\n    bboxFilter = BoundingBoxIntersectsFilter(scaledBbox)\n    solidFilter = ElementIntersectsSolidFilter(scaledSolid)\n\n    # Get all pipe elements and apply bounding box filter first\n    collector = FilteredElementCollector(doc)\n    pipes = collector.OfCategory(BuiltInCategory.OST_PipeCurves).WhereElementIsNotElementType().WherePasses(bboxFilter).ToElements()\n\n    # Apply solid filter to get elements that actually intersect\n    intersectingElements = []\n    for pipe in pipes:\n        if solidFilter.PassesFilter(pipe):\n            # Exclude the wall itself (though pipes shouldn't match wall Id)\n            if pipe.Id != wall.Id:\n                intersectingElements.append(pipe)\n\n    OUT = intersectingElements",
+      "Engine": "CPython3",
+      "VariableInputPorts": true,
+      "Id": "b6166cb9ccb947a29fcf37d585dcf2e0",
+      "NodeType": "PythonScriptNode",
+      "Inputs": [
+        {
+          "Id": "08105e7648724bd0801d3f496b7ad02d",
+          "Name": "IN[0]",
+          "Description": "Input #0",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "14afe12ccb0344ae8bbdeda60a2684ea",
+          "Name": "OUT",
+          "Description": "Result of the python script",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Runs an embedded Python script."
+    }
+  ],
+  "Connectors": [
+    {
+      "Start": "37dddd3ee646498fa7ec3dcf0a99d863",
+      "End": "369a255382b64672ab03ccbd253b3c51",
+      "Id": "524583760f044973835203c9867179d5",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "5813821df6424909a9cee0dfe6d2aeb9",
+      "End": "20fec2d56367444fb6f9a2a4b630ea2c",
+      "Id": "db51173376784edfbcb3d2c516693dc5",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "5813821df6424909a9cee0dfe6d2aeb9",
+      "End": "c1af1b4a7f744880a73e8ef94198aebf",
+      "Id": "ccad192713f844dba85c24eb4e5477dd",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "5813821df6424909a9cee0dfe6d2aeb9",
+      "End": "de9f067273cf4c26b5bee658c33991fd",
+      "Id": "3f097081677e4132ba23e156c8221e62",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "5813821df6424909a9cee0dfe6d2aeb9",
+      "End": "08105e7648724bd0801d3f496b7ad02d",
+      "Id": "b1289bfae00c4641beff68745bdbb205",
+      "IsHidden": "False"
+    }
+  ],
+  "Dependencies": [],
+  "NodeLibraryDependencies": [],
+  "EnableLegacyPolyCurveBehavior": true,
+  "Thumbnail": "",
+  "GraphDocumentationURL": null,
+  "ExtensionWorkspaceData": [
+    {
+      "ExtensionGuid": "28992e1d-abb9-417f-8b1b-05e053bee670",
+      "Name": "Properties",
+      "Version": "3.3",
+      "Data": {}
+    },
+    {
+      "ExtensionGuid": "DFBD9CC0-DB40-457A-939E-8C8555555A9D",
+      "Name": "Generative Design",
+      "Version": "8.2",
+      "Data": {}
+    }
+  ],
+  "Author": "",
+  "Linting": {
+    "activeLinter": "None",
+    "activeLinterId": "7b75fb44-43fd-4631-a878-29f4d5d8399a",
+    "warningCount": 0,
+    "errorCount": 0
+  },
+  "Bindings": [],
+  "View": {
+    "Dynamo": {
+      "ScaleFactor": 1.0,
+      "HasRunWithoutCrash": true,
+      "IsVisibleInDynamoLibrary": true,
+      "Version": "3.3.0.6316",
+      "RunType": "Manual",
+      "RunPeriod": "1000"
+    },
+    "Camera": {
+      "Name": "_Background Preview",
+      "EyeX": -17.0,
+      "EyeY": 24.0,
+      "EyeZ": 50.0,
+      "LookX": 12.0,
+      "LookY": -13.0,
+      "LookZ": -58.0,
+      "UpX": 0.0,
+      "UpY": 1.0,
+      "UpZ": 0.0
+    },
+    "ConnectorPins": [],
+    "NodeViews": [
+      {
+        "Id": "9ed89a1dd73f420ea3a89b1b7c6475eb",
+        "Name": "Sheet creation - Adthiya",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": true,
+        "ShowGeometry": true,
+        "X": 218.18507105607893,
+        "Y": 529.0629479739855
+      },
+      {
+        "Id": "6d4778168ea74e2dad2fc17bcd6d6b44",
+        "Name": "Clash View Isolation",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": true,
+        "ShowGeometry": true,
+        "X": 776.9482911355311,
+        "Y": 624.5380062691363
+      },
+      {
+        "Id": "cbd429b10bf3451ab08b7a7483656ca4",
+        "Name": "Select Model Element",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 416.5666553311445,
+        "Y": 652.7722756223105
+      },
+      {
+        "Id": "0cfcd01115e04c80b30f2c6d54c43bdf",
+        "Name": "Babu - COde",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": true,
+        "ShowGeometry": true,
+        "X": 691.258114454822,
+        "Y": 385.9007823642757
+      },
+      {
+        "Id": "99d54af6be4a427996a9973609e31a41",
+        "Name": "Python Script",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 1483.7206909378567,
+        "Y": 351.6268311601666
+      },
+      {
+        "Id": "ad2d45d694204a3eb455fc604ec59c34",
+        "Name": "Wall Types",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 1078.675830524072,
+        "Y": 409.3726655947846
+      },
+      {
+        "Id": "377233c83ae74735bafb6d585f097300",
+        "Name": "Select Model Element",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 1075.4830946252491,
+        "Y": 243.02186046529448
+      },
+      {
+        "Id": "b6166cb9ccb947a29fcf37d585dcf2e0",
+        "Name": "Python Script",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 1437.629445301208,
+        "Y": 830.254368396147
+      }
+    ],
+    "Annotations": [],
+    "X": -1147.1621059207796,
+    "Y": -202.31603524474963,
+    "Zoom": 1.048506661938072
+  }
+}

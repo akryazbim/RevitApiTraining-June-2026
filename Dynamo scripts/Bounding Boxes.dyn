@@ -1,0 +1,274 @@
+{
+  "Uuid": "27e5bd61-9dd2-4652-a2d1-3a01979637a3",
+  "IsCustomNode": false,
+  "Description": "",
+  "Name": "Bounding Boxes",
+  "ElementResolver": {
+    "ResolutionMap": {}
+  },
+  "Inputs": [],
+  "Outputs": [],
+  "Nodes": [
+    {
+      "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
+      "Code": "import clr\r\n\r\nimport sys\r\nsys.path.append('C:\\Program Files (x86)\\IronPython 2.7\\Lib')\r\n\r\nimport System\r\nfrom System.Collections.Generic import *\r\n\r\nclr.AddReference('ProtoGeometry')\r\nfrom Autodesk.DesignScript.Geometry import *\r\n\r\nclr.AddReference(\"RevitNodes\")\r\nimport Revit\r\nclr.ImportExtensions(Revit.Elements)\r\nclr.ImportExtensions(Revit.GeometryConversion)\r\nclr.AddReference(\"RevitServices\")\r\nimport RevitServices\r\nfrom RevitServices.Persistence import DocumentManager \r\nfrom RevitServices.Transactions import TransactionManager \r\n\r\nclr.AddReference(\"RevitAPI\")\r\nclr.AddReference(\"RevitAPIUI\")\r\n\r\nimport Autodesk \r\nfrom Autodesk.Revit.DB import *\r\nfrom Autodesk.Revit.DB.Mechanical import *\r\nfrom Autodesk.Revit.DB.Electrical import *\r\nfrom Autodesk.Revit.UI import *\r\n\r\ndoc = DocumentManager.Instance.CurrentDBDocument\r\nuiapp = DocumentManager.Instance.CurrentUIApplication \r\napp = uiapp.Application \r\nuidoc = uiapp.ActiveUIDocument\r\n\r\ndef tolist(obj1):\r\n\tif isinstance(obj1,(list, tuple, set)): return obj1\r\n\telse: return [obj1]\r\n\r\n#Preparing input from dynamo to revit\r\nele = UnwrapElement(IN[0])\r\n\r\n#Do some action in a Transaction\r\n\r\nTransactionManager.Instance.EnsureInTransaction(doc)\r\n\r\ncatList = List[BuiltInCategory]()\r\ncatList.Add(BuiltInCategory.OST_DuctCurves)\r\ncatList.Add(BuiltInCategory.OST_CableTray)\r\ncatList.Add(BuiltInCategory.OST_PipeCurves)\r\n\r\n\r\ncatFilter = ElementMulticategoryFilter(catList)\r\n\r\n\r\nbb = ele.get_BoundingBox(None)\r\n\r\not = Outline(bb.Min, bb.Max)\r\n\r\nbbFilter = BoundingBoxIntersectsFilter(ot)\r\n\r\nclashes = FilteredElementCollector(doc).WherePasses(catFilter).WherePasses(bbFilter).ToElements()\r\n\"\"\"\r\nwallComments = ele.LookupParameter(\"Comments\").AsString()\r\n\r\nfor clash in clashes:\r\n    clash.LookupParameter(\"Comments\").Set(wallComments)\r\n\r\n\"\"\"\r\n\"\"\"\r\npublic static View3D CreateIsometric(\r\n    Document document,\r\n    ElementId viewFamilyTypeId\r\n)\r\n  \r\nvfts = FilteredElementCollector(doc).OfClass(ViewFamilyType).ToElements()\r\n\r\nfor vft in vfts:\r\n    if vft.ViewFamily == ViewFamily.ThreeDimensional:\r\n        view3DType = vft\r\n\r\nnew3dView = View3D.CreateIsometric(doc, view3DType.Id)\r\nnew3dView.Name = \"Clash View-\"+str(ele.Id.IntegerValue)\r\n\r\nidList = List[ElementId]()\r\nfor clash in clashes:\r\n    idList.Add(clash.Id)\r\n\r\nidList.Add(ele.Id)\r\n\r\nnew3dView.IsolateElementsTemporary(idList)\r\n\"\"\"\r\nTransactionManager.Instance.TransactionTaskDone()\r\n\r\nOUT = view3DType",
+      "Engine": "CPython3",
+      "VariableInputPorts": true,
+      "Id": "4760493c53fd4ab7b0019d7118064107",
+      "NodeType": "PythonScriptNode",
+      "Inputs": [
+        {
+          "Id": "545696adc66244b5a5fdd56a85df47e4",
+          "Name": "IN[0]",
+          "Description": "Input #0",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "a184747c0ae446a1b2228c694fbd7efe",
+          "Name": "IN[1]",
+          "Description": "Input #1",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "e4ed87a9f59247d299009f0550c2e6ea",
+          "Name": "OUT",
+          "Description": "Result of the python script",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Runs an embedded Python script."
+    },
+    {
+      "ConcreteType": "Dynamo.Nodes.DSModelElementSelection, DSRevitNodesUI",
+      "NodeType": "ExtensionNode",
+      "InstanceId": [
+        "cf97e9f3-211f-4250-be64-25110c2f67af-00050a01"
+      ],
+      "Id": "a59596ca837940aeb5206164c6e10144",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "859bbd6b94a7497c88cb59dc7e9aa57a",
+          "Name": "Element",
+          "Description": "The selected elements.",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Select a model element from the document."
+    },
+    {
+      "ConcreteType": "Dynamo.Nodes.DSModelElementsSelection, DSRevitNodesUI",
+      "NodeType": "ExtensionNode",
+      "InstanceId": [
+        "cf97e9f3-211f-4250-be64-25110c2f67af-00050a01",
+        "cf97e9f3-211f-4250-be64-25110c2f67af-00050b56",
+        "cf97e9f3-211f-4250-be64-25110c2f67af-00050b7d"
+      ],
+      "Id": "c25170a9bd0a46ca9f3b633966843eef",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "c32bb4976e2b4309b5374caf9ccb9bac",
+          "Name": "Elements",
+          "Description": "The selected elements.",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Select multiple elements from the Revit document."
+    },
+    {
+      "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
+      "Code": "import clr\r\n\r\nimport sys\r\nsys.path.append('C:\\Program Files (x86)\\IronPython 2.7\\Lib')\r\n\r\nimport System\r\nfrom System.Collections.Generic import *\r\n\r\nclr.AddReference('ProtoGeometry')\r\nfrom Autodesk.DesignScript.Geometry import *\r\n\r\nclr.AddReference(\"RevitNodes\")\r\nimport Revit\r\nclr.ImportExtensions(Revit.Elements)\r\nclr.ImportExtensions(Revit.GeometryConversion)\r\nclr.AddReference(\"RevitServices\")\r\nimport RevitServices\r\nfrom RevitServices.Persistence import DocumentManager \r\nfrom RevitServices.Transactions import TransactionManager \r\n\r\nclr.AddReference(\"RevitAPI\")\r\nclr.AddReference(\"RevitAPIUI\")\r\n\r\nimport Autodesk \r\nfrom Autodesk.Revit.DB import *\r\nfrom Autodesk.Revit.DB.Electrical import *\r\nfrom Autodesk.Revit.UI import *\r\n\r\ndoc = DocumentManager.Instance.CurrentDBDocument\r\nuiapp = DocumentManager.Instance.CurrentUIApplication \r\napp = uiapp.Application \r\nuidoc = uiapp.ActiveUIDocument\r\n\r\ndef tolist(obj1):\r\n\tif isinstance(obj1,(list, tuple, set)): return obj1\r\n\telse: return [obj1]\r\n\r\n#Preparing input from dynamo to revit\r\nele = UnwrapElement(IN[0])\r\n\r\n#Do some action in a Transaction\r\n\r\nTransactionManager.Instance.EnsureInTransaction(doc)\r\n\r\ncatList = List[BuiltInCategory]()\r\ncatList.Add(BuiltInCategory.OST_DuctCurves)\r\ncatList.Add(BuiltInCategory.OST_CableTray)\r\ncatList.Add(BuiltInCategory.OST_PipeCurves)\r\n\r\ncatFilter = ElementMulticategoryFilter(catList)\r\n\r\nview = doc.ActiveView\r\n\r\nbb = ele.get_BoundingBox(None)\r\n\r\not = Outline(bb.Min, bb.Max)\r\n\r\nbbFilter = BoundingBoxIntersectsFilter(ot)\r\n\r\neleFilter = ElementIntersectsElementFilter(ele)\r\n\r\nclashes = FilteredElementCollector(doc).WherePasses(catFilter).WherePasses(eleFilter).ToElements()\r\n\r\n\r\nTransactionManager.Instance.TransactionTaskDone()\r\n\r\nOUT = clashes",
+      "Engine": "CPython3",
+      "VariableInputPorts": true,
+      "Id": "3f79ead487d245bebf576032e65da576",
+      "NodeType": "PythonScriptNode",
+      "Inputs": [
+        {
+          "Id": "ee66e9984653419e9fb952c9152f6e8f",
+          "Name": "IN[0]",
+          "Description": "Input #0",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "a1e9f6a5bdab4252971f4fd3d54bd298",
+          "Name": "OUT",
+          "Description": "Result of the python script",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Runs an embedded Python script."
+    },
+    {
+      "ConcreteType": "Dynamo.Nodes.DSModelElementSelection, DSRevitNodesUI",
+      "NodeType": "ExtensionNode",
+      "InstanceId": [
+        "cf97e9f3-211f-4250-be64-25110c2f67af-00050a01"
+      ],
+      "Id": "82ca289888a649cf898c65b493fa5082",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "e9c27233fa4443e6a5a30eb1bbede35c",
+          "Name": "Element",
+          "Description": "The selected elements.",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Select a model element from the document."
+    }
+  ],
+  "Connectors": [
+    {
+      "Start": "859bbd6b94a7497c88cb59dc7e9aa57a",
+      "End": "545696adc66244b5a5fdd56a85df47e4",
+      "Id": "19cfc517d78e45d98a3b07a908f65387",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "e9c27233fa4443e6a5a30eb1bbede35c",
+      "End": "ee66e9984653419e9fb952c9152f6e8f",
+      "Id": "8b2f88cd0a814f2c9ec2b55b7b2ee16b",
+      "IsHidden": "False"
+    }
+  ],
+  "Dependencies": [],
+  "NodeLibraryDependencies": [],
+  "EnableLegacyPolyCurveBehavior": null,
+  "Thumbnail": "",
+  "GraphDocumentationURL": null,
+  "ExtensionWorkspaceData": [
+    {
+      "ExtensionGuid": "28992e1d-abb9-417f-8b1b-05e053bee670",
+      "Name": "Properties",
+      "Version": "3.3",
+      "Data": {}
+    },
+    {
+      "ExtensionGuid": "DFBD9CC0-DB40-457A-939E-8C8555555A9D",
+      "Name": "Generative Design",
+      "Version": "8.2",
+      "Data": {}
+    }
+  ],
+  "Author": "",
+  "Linting": {
+    "activeLinter": "None",
+    "activeLinterId": "7b75fb44-43fd-4631-a878-29f4d5d8399a",
+    "warningCount": 0,
+    "errorCount": 0
+  },
+  "Bindings": [],
+  "View": {
+    "Dynamo": {
+      "ScaleFactor": 1.0,
+      "HasRunWithoutCrash": true,
+      "IsVisibleInDynamoLibrary": true,
+      "Version": "3.3.0.6316",
+      "RunType": "Manual",
+      "RunPeriod": "1000"
+    },
+    "Camera": {
+      "Name": "_Background Preview",
+      "EyeX": -17.0,
+      "EyeY": 24.0,
+      "EyeZ": 50.0,
+      "LookX": 12.0,
+      "LookY": -13.0,
+      "LookZ": -58.0,
+      "UpX": 0.0,
+      "UpY": 1.0,
+      "UpZ": 0.0
+    },
+    "ConnectorPins": [],
+    "NodeViews": [
+      {
+        "Id": "4760493c53fd4ab7b0019d7118064107",
+        "Name": "Find Clashes and Create views",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 584.6466301369874,
+        "Y": 512.9257450498553
+      },
+      {
+        "Id": "a59596ca837940aeb5206164c6e10144",
+        "Name": "Select Model Element",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 256.3820911111953,
+        "Y": 478.92998507609076
+      },
+      {
+        "Id": "c25170a9bd0a46ca9f3b633966843eef",
+        "Name": "Select Model Elements",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 226.06812794211703,
+        "Y": 662.2601468656891
+      },
+      {
+        "Id": "3f79ead487d245bebf576032e65da576",
+        "Name": "Python Script",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 1099.1236071075498,
+        "Y": 209.48676364073282
+      },
+      {
+        "Id": "82ca289888a649cf898c65b493fa5082",
+        "Name": "Select Model Element",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 828.15827796687,
+        "Y": 175.27981407440967
+      }
+    ],
+    "Annotations": [],
+    "X": -1431.3230948475236,
+    "Y": -112.49221811781638,
+    "Zoom": 1.6001030088099997
+  }
+}

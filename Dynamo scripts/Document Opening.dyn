@@ -1,0 +1,436 @@
+{
+  "Uuid": "08546086-5bb7-4e45-99c5-f3d71289a6e1",
+  "IsCustomNode": false,
+  "Description": "",
+  "Name": "Document Opening",
+  "ElementResolver": {
+    "ResolutionMap": {}
+  },
+  "Inputs": [],
+  "Outputs": [],
+  "Nodes": [
+    {
+      "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
+      "Code": "import clr\r\n\r\nimport sys\r\nsys.path.append('C:\\Program Files (x86)\\IronPython 2.7\\Lib')\r\n\r\nimport System\r\nfrom System.Collections.Generic import *\r\n\r\nclr.AddReference('ProtoGeometry')\r\nfrom Autodesk.DesignScript.Geometry import *\r\n\r\nclr.AddReference(\"RevitNodes\")\r\nimport Revit\r\nclr.ImportExtensions(Revit.Elements)\r\nclr.ImportExtensions(Revit.GeometryConversion)\r\nclr.AddReference(\"RevitServices\")\r\nimport RevitServices\r\nfrom RevitServices.Persistence import DocumentManager \r\nfrom RevitServices.Transactions import TransactionManager \r\n\r\nclr.AddReference(\"RevitAPI\")\r\nclr.AddReference(\"RevitAPIUI\")\r\n\r\nimport Autodesk \r\nfrom Autodesk.Revit.DB import *\r\nfrom Autodesk.Revit.DB.Mechanical import *\r\nfrom Autodesk.Revit.DB.Electrical import *\r\nfrom Autodesk.Revit.UI import *\r\n\r\ndoc = DocumentManager.Instance.CurrentDBDocument\r\nuiapp = DocumentManager.Instance.CurrentUIApplication \r\napp = uiapp.Application \r\nuidoc = uiapp.ActiveUIDocument\r\n\r\ndef tolist(obj1):\r\n    if isinstance(obj1,(list, tuple, set)): return obj1\r\n    else: return [obj1]\r\n\r\n#Preparing input from dynamo to revit\r\nelement = UnwrapElement(IN[0])\r\n\r\n#Do some action in a Transaction\r\n\r\nfilePath = r\"C:\\Users\\Akryazz\\OneDrive\\Documents\\My Files\\Revit Api Training\\Python Revit API Training\\Revit Models\\2025\\MEP Model.rvt\"\r\n\r\nnewDoc = app.OpenDocumentFile(filePath)\r\n\r\n\r\nTransactionManager.Instance.EnsureInTransaction(newDoc)\r\n\r\nducts = FilteredElementCollector(newDoc).OfClass(Duct).ToElements()\r\n\r\nvalues = []\r\n\r\nfor duct in ducts:\r\n    param = duct.LookupParameter(\"Comments\")\r\n    paramValue = param.AsString()\r\n    param.Set(\"Dr.Doom\")\r\n    values.append(paramValue)\r\n\r\nTransactionManager.Instance.ForceCloseTransaction()\r\n\r\nnewDoc.Save()\r\n\r\n\r\n\r\n\"\"\"\r\npublic void Export(\r\n    string folder,\r\n    string name,\r\n    NavisworksExportOptions options\r\n)\r\n\r\nexportFolderPath = r\"C:\\Users\\Akryazz\\Downloads\\Exports\"\r\n\r\nnwcOpt = NavisworksExportOptions()\r\n\r\nnwcName = \"Melody.nwc\"\r\n\r\n\r\ndoc.Export(exportFolderPath, nwcName, nwcOpt)\r\n\"\"\"\r\n\r\n\r\nOUT = \"\"",
+      "Engine": "CPython3",
+      "VariableInputPorts": true,
+      "Id": "41c902cc55974802bc83dbe5701a2254",
+      "NodeType": "PythonScriptNode",
+      "Inputs": [
+        {
+          "Id": "72a1e237401f49a4aecab3f2a38efed2",
+          "Name": "IN[0]",
+          "Description": "Input #0",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "b259c9bb0ff14b1090558c99b4b97e1c",
+          "Name": "OUT",
+          "Description": "Result of the python script",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Runs an embedded Python script."
+    },
+    {
+      "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
+      "Code": "import clr\r\n\r\nimport sys\r\nsys.path.append('C:\\Program Files (x86)\\IronPython 2.7\\Lib')\r\n\r\nimport System\r\nfrom System.Collections.Generic import *\r\n\r\nclr.AddReference('ProtoGeometry')\r\nfrom Autodesk.DesignScript.Geometry import *\r\n\r\nclr.AddReference(\"RevitNodes\")\r\nimport Revit\r\nclr.ImportExtensions(Revit.Elements)\r\nclr.ImportExtensions(Revit.GeometryConversion)\r\nclr.AddReference(\"RevitServices\")\r\nimport RevitServices\r\nfrom RevitServices.Persistence import DocumentManager \r\nfrom RevitServices.Transactions import TransactionManager \r\n\r\nclr.AddReference(\"RevitAPI\")\r\nclr.AddReference(\"RevitAPIUI\")\r\n\r\nimport Autodesk \r\nfrom Autodesk.Revit.DB import *\r\nfrom Autodesk.Revit.DB.Mechanical import *\r\nfrom Autodesk.Revit.DB.Electrical import *\r\nfrom Autodesk.Revit.UI import *\r\n\r\ndoc = DocumentManager.Instance.CurrentDBDocument\r\nuiapp = DocumentManager.Instance.CurrentUIApplication \r\napp = uiapp.Application \r\nuidoc = uiapp.ActiveUIDocument\r\n\r\ndef tolist(obj1):\r\n\tif isinstance(obj1,(list, tuple, set)): return obj1\r\n\telse: return [obj1]\r\n\r\n#Preparing input from dynamo to revit\r\nfilaPaths = UnwrapElement(IN[0])\r\n\r\n\"\"\"\r\n#filePath = r\"C:\\Users\\Akryazz\\OneDrive\\Documents\\My Files\\Revit Api Training\\Python Revit API Training\\Revit Models\\2025\\MEP Model.rvt\"\r\n\r\nnewDoc = app.OpenDocumentFile(filePath)\r\n\r\n\r\nTransactionManager.Instance.EnsureInTransaction(newDoc)\r\n\r\n\r\nducts = FilteredElementCollector(newDoc).OfClass(Duct).ToElements()\r\n\r\nvalues = []\r\n\r\nfor duct in ducts:\r\n    param = duct.LookupParameter(\"Comments\")\r\n    paramValue = param.AsString()\r\n    param.Set(\"Dr.Doom\")\r\n    values.append(paramValue)\r\n\r\nTransactionManager.Instance.ForceCloseTransaction()\r\n\"\"\"\r\n\r\nfor filePath in filePaths:\r\n    newDoc = app.OpenDocumentFile(filePath)\r\n    exportFolderPath = r\"C:\\Users\\Akryazz\\Downloads\\Exports\"\r\n    \r\n    nwcOpt = NavisworksExportOptions()\r\n    \r\n    nwcName = newDoc.Title+\".nwc\"\r\n\r\n    newDoc.Export(exportFolderPath, nwcName, nwcOpt)\r\n\r\n\r\n\r\n#newDoc.Save()\r\n\r\n\r\nOUT = \"\"",
+      "Engine": "CPython3",
+      "VariableInputPorts": true,
+      "Id": "c698056d9dcc45b6ae7515c03fc84e83",
+      "NodeType": "PythonScriptNode",
+      "Inputs": [
+        {
+          "Id": "b6a27ad8b1684dd6b7bb1c5e87643b21",
+          "Name": "IN[0]",
+          "Description": "Input #0",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "2802f4e76ccd41159450302eede14e6e",
+          "Name": "OUT",
+          "Description": "Result of the python script",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Runs an embedded Python script."
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.Filename, CoreNodeModels",
+      "Id": "cf3a5577c303452eba87c8c4c80078f9",
+      "NodeType": "ExtensionNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "8b921deef1e04b30b197bddfd0db8d50",
+          "Name": "",
+          "Description": "File Path",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Allows you to select a file on the system and returns its file path",
+      "HintPath": "C:\\Users\\Akryazz\\OneDrive\\Documents\\My Files\\Revit Api Training\\Python Revit API Training\\Revit Models\\2025\\MEP Model.rvt",
+      "InputValue": "..\\..\\..\\..\\OneDrive\\Documents\\My Files\\Revit Api Training\\Python Revit API Training\\Revit Models\\2025\\MEP Model.rvt"
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.Filename, CoreNodeModels",
+      "Id": "45f1fcb975b54dfa9f49ad2ad5f3011f",
+      "NodeType": "ExtensionNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "3d372d394c674287bc44ef8b0ce3999e",
+          "Name": "",
+          "Description": "File Path",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Allows you to select a file on the system and returns its file path",
+      "HintPath": "C:\\Users\\Akryazz\\OneDrive\\Documents\\My Files\\Revit Api Training\\Python Revit API Training\\Revit Models\\2025\\RoomModel.rvt",
+      "InputValue": "..\\..\\..\\..\\OneDrive\\Documents\\My Files\\Revit Api Training\\Python Revit API Training\\Revit Models\\2025\\RoomModel.rvt"
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.Filename, CoreNodeModels",
+      "Id": "b4e1da0bae254c41b8d805e87bb703ba",
+      "NodeType": "ExtensionNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "20d42cda162b48d3bcb421122dce5178",
+          "Name": "",
+          "Description": "File Path",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Allows you to select a file on the system and returns its file path",
+      "HintPath": "C:\\Users\\Akryazz\\OneDrive\\Documents\\My Files\\Revit Api Training\\Python Revit API Training\\Revit Models\\2025\\SpaceModel.rvt",
+      "InputValue": "..\\..\\..\\..\\OneDrive\\Documents\\My Files\\Revit Api Training\\Python Revit API Training\\Revit Models\\2025\\SpaceModel.rvt"
+    },
+    {
+      "ConcreteType": "CoreNodeModels.CreateList, CoreNodeModels",
+      "VariableInputPorts": true,
+      "Id": "ad927c79ee444b469b2d4479e3c895bb",
+      "NodeType": "ExtensionNode",
+      "Inputs": [
+        {
+          "Id": "774aa4521d754a9cacc1e8a93380513e",
+          "Name": "item0",
+          "Description": "Item Index #0",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "8b12b7aba06246678a7804724aad83a5",
+          "Name": "item1",
+          "Description": "Item Index #1",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "750d1869396840c886ad6005ed2e1698",
+          "Name": "item2",
+          "Description": "Item Index #2",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "b2e6bc2b45754670aaa2f879d2d6b496",
+          "Name": "list",
+          "Description": "A list (type: var[]..[])",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Makes a new list from the given inputs"
+    },
+    {
+      "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
+      "Code": "import clr\r\n\r\nimport sys\r\nsys.path.append(r'C:\\Program Files (x86)\\IronPython 2.7\\Lib')\r\n\r\nimport System\r\nfrom System.Collections.Generic import *\r\n\r\nclr.AddReference('ProtoGeometry')\r\nfrom Autodesk.DesignScript.Geometry import *\r\n\r\nclr.AddReference(\"RevitNodes\")\r\nimport Revit\r\nclr.ImportExtensions(Revit.Elements)\r\nclr.ImportExtensions(Revit.GeometryConversion)\r\nclr.AddReference(\"RevitServices\")\r\nimport RevitServices\r\nfrom RevitServices.Persistence import DocumentManager \r\nfrom RevitServices.Transactions import TransactionManager \r\n\r\nclr.AddReference(\"RevitAPI\")\r\nclr.AddReference(\"RevitAPIUI\")\r\n\r\nimport Autodesk \r\nfrom Autodesk.Revit.DB import *\r\nfrom Autodesk.Revit.DB.Electrical import *\r\nfrom Autodesk.Revit.UI import *\r\n\r\ndoc = DocumentManager.Instance.CurrentDBDocument\r\nuiapp = DocumentManager.Instance.CurrentUIApplication \r\napp = uiapp.Application \r\nuidoc = uiapp.ActiveUIDocument\r\n\r\ndef tolist(obj1):\r\n\tif isinstance(obj1,(list, tuple, set)): return obj1\r\n\telse: return [obj1]\r\n\r\n#Preparing input from dynamo to revit\r\nfilePaths = UnwrapElement(IN[0])\r\n\r\n\r\nfor filePath in filePaths:\r\n    newDoc = app.OpenDocumentFile(filePath)\r\n    exportFolderPath = r\"C:\\Users\\Akryazz\\Downloads\\Exports\"\r\n    \r\n    nwcOpt = NavisworksExportOptions()\r\n    \r\n    nwcName = newDoc.Title+\".nwc\"\r\n\r\n    newDoc.Export(exportFolderPath, nwcName, nwcOpt)\r\n\r\n\r\n\r\n\r\nOUT = filePaths[0]",
+      "Engine": "CPython3",
+      "VariableInputPorts": true,
+      "Id": "def981ed428f4cd49421f432c548fb80",
+      "NodeType": "PythonScriptNode",
+      "Inputs": [
+        {
+          "Id": "9510ae98ae924e0e81853314d04bc033",
+          "Name": "IN[0]",
+          "Description": "Input #0",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "64ff84937d9b4ecca1f82d8c922db1d5",
+          "Name": "OUT",
+          "Description": "Result of the python script",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Runs an embedded Python script."
+    },
+    {
+      "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
+      "Code": "import clr\r\n\r\nimport sys\r\nsys.path.append('C:\\Program Files (x86)\\IronPython 2.7\\Lib')\r\n\r\nimport System\r\nfrom System.Collections.Generic import *\r\n\r\nclr.AddReference('ProtoGeometry')\r\nfrom Autodesk.DesignScript.Geometry import *\r\n\r\nclr.AddReference(\"RevitNodes\")\r\nimport Revit\r\nclr.ImportExtensions(Revit.Elements)\r\nclr.ImportExtensions(Revit.GeometryConversion)\r\nclr.AddReference(\"RevitServices\")\r\nimport RevitServices\r\nfrom RevitServices.Persistence import DocumentManager \r\nfrom RevitServices.Transactions import TransactionManager \r\n\r\nclr.AddReference(\"RevitAPI\")\r\nclr.AddReference(\"RevitAPIUI\")\r\n\r\nimport Autodesk \r\nfrom Autodesk.Revit.DB import *\r\nfrom Autodesk.Revit.DB.Electrical import *\r\nfrom Autodesk.Revit.UI import *\r\n\r\ndoc = DocumentManager.Instance.CurrentDBDocument\r\nuiapp = DocumentManager.Instance.CurrentUIApplication \r\napp = uiapp.Application \r\nuidoc = uiapp.ActiveUIDocument\r\n\r\ndef tolist(obj1):\r\n\tif isinstance(obj1,(list, tuple, set)): return obj1\r\n\telse: return [obj1]\r\n\r\n#Preparing input from dynamo to revit\r\nelement = UnwrapElement(IN[0])\r\n\r\n#Do some action in a Transaction\r\n\r\nfilePath = r\"C:\\Users\\Akryazz\\OneDrive\\Documents\\My Files\\Revit Api Training\\Python Revit API Training\\Revit Models\\2025\\Elec-Workshared.rvt\"\r\n\r\nmp = FilePath(filePath)\r\n\r\nopenOpt = OpenOptions()\r\n\r\nnewDoc = app.OpenDocumentFile(mp, openOpt)\r\n\r\ncts = FilteredElementCollector(newDoc).OfClass(CableTray).ToElements()\r\n\r\nTransactionManager.Instance.EnsureInTransaction(newDoc)\r\n\r\nvalues = []\r\n\r\nfor ct in cts:\r\n    param = ct.LookupParameter(\"Comments\")\r\n    paramValue = param.AsString()\r\n    values.append(paramValue)\r\n    param.Set(\"CJP\")\r\n    \r\n\r\nTransactionManager.Instance.ForceCloseTransaction()\r\n\r\nsyncOpt = SynchronizeWithCentralOptions()\r\ntranOpt = TransactWithCentralOptions()\r\n\r\nnewDoc.SynchronizeWithCentral(tranOpt, syncOpt)\r\n\r\nnewDoc.Close()\r\n\r\nOUT = values",
+      "Engine": "CPython3",
+      "VariableInputPorts": true,
+      "Id": "df74ec2225e54620881a8334b67fbb23",
+      "NodeType": "PythonScriptNode",
+      "Inputs": [
+        {
+          "Id": "19d56f6dfe444a2ba78a48904f28eb61",
+          "Name": "IN[0]",
+          "Description": "Input #0",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "ca7333ca05844726b17bb4dbf6fa37c7",
+          "Name": "OUT",
+          "Description": "Result of the python script",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Runs an embedded Python script."
+    }
+  ],
+  "Connectors": [
+    {
+      "Start": "8b921deef1e04b30b197bddfd0db8d50",
+      "End": "774aa4521d754a9cacc1e8a93380513e",
+      "Id": "56b8e5d8d93f45eeacce89c05b88880d",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "3d372d394c674287bc44ef8b0ce3999e",
+      "End": "8b12b7aba06246678a7804724aad83a5",
+      "Id": "25f6900316a24f19afabb4ba24948b3f",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "20d42cda162b48d3bcb421122dce5178",
+      "End": "750d1869396840c886ad6005ed2e1698",
+      "Id": "59b33bcc36574a6cb45c8ca5b2f8bd28",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "b2e6bc2b45754670aaa2f879d2d6b496",
+      "End": "9510ae98ae924e0e81853314d04bc033",
+      "Id": "17544c999a154d3ab41821a096cf370f",
+      "IsHidden": "False"
+    }
+  ],
+  "Dependencies": [],
+  "NodeLibraryDependencies": [
+    {
+      "Name": "MEP Model.rvt",
+      "ReferenceType": "External",
+      "Nodes": [
+        "cf3a5577c303452eba87c8c4c80078f9"
+      ]
+    },
+    {
+      "Name": "RoomModel.rvt",
+      "ReferenceType": "External",
+      "Nodes": [
+        "45f1fcb975b54dfa9f49ad2ad5f3011f"
+      ]
+    },
+    {
+      "Name": "SpaceModel.rvt",
+      "ReferenceType": "External",
+      "Nodes": [
+        "b4e1da0bae254c41b8d805e87bb703ba"
+      ]
+    }
+  ],
+  "EnableLegacyPolyCurveBehavior": true,
+  "Thumbnail": "",
+  "GraphDocumentationURL": null,
+  "ExtensionWorkspaceData": [
+    {
+      "ExtensionGuid": "28992e1d-abb9-417f-8b1b-05e053bee670",
+      "Name": "Properties",
+      "Version": "3.3",
+      "Data": {}
+    },
+    {
+      "ExtensionGuid": "DFBD9CC0-DB40-457A-939E-8C8555555A9D",
+      "Name": "Generative Design",
+      "Version": "8.2",
+      "Data": {}
+    }
+  ],
+  "Author": "",
+  "Linting": {
+    "activeLinter": "None",
+    "activeLinterId": "7b75fb44-43fd-4631-a878-29f4d5d8399a",
+    "warningCount": 0,
+    "errorCount": 0
+  },
+  "Bindings": [],
+  "View": {
+    "Dynamo": {
+      "ScaleFactor": 1.0,
+      "HasRunWithoutCrash": true,
+      "IsVisibleInDynamoLibrary": true,
+      "Version": "3.3.0.6316",
+      "RunType": "Manual",
+      "RunPeriod": "1000"
+    },
+    "Camera": {
+      "Name": "_Background Preview",
+      "EyeX": -17.0,
+      "EyeY": 24.0,
+      "EyeZ": 50.0,
+      "LookX": 12.0,
+      "LookY": -13.0,
+      "LookZ": -58.0,
+      "UpX": 0.0,
+      "UpY": 1.0,
+      "UpZ": 0.0
+    },
+    "ConnectorPins": [],
+    "NodeViews": [
+      {
+        "Id": "41c902cc55974802bc83dbe5701a2254",
+        "Name": "Python Script",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": true,
+        "ShowGeometry": true,
+        "X": -519.0098568528424,
+        "Y": -197.56866938581192
+      },
+      {
+        "Id": "c698056d9dcc45b6ae7515c03fc84e83",
+        "Name": "Python Script",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": true,
+        "ShowGeometry": true,
+        "X": 1055.542130458163,
+        "Y": -15.449761960945011
+      },
+      {
+        "Id": "cf3a5577c303452eba87c8c4c80078f9",
+        "Name": "File Path",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 277.8843642308914,
+        "Y": 150.72650025964603
+      },
+      {
+        "Id": "45f1fcb975b54dfa9f49ad2ad5f3011f",
+        "Name": "File Path",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 263.6764414573021,
+        "Y": 310.8031191473138
+      },
+      {
+        "Id": "b4e1da0bae254c41b8d805e87bb703ba",
+        "Name": "File Path",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 261.8595544081418,
+        "Y": 464.9195974683204
+      },
+      {
+        "Id": "ad927c79ee444b469b2d4479e3c895bb",
+        "Name": "List Create",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 735.3428421150198,
+        "Y": 329.3878691817565
+      },
+      {
+        "Id": "def981ed428f4cd49421f432c548fb80",
+        "Name": "Python Script",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": true,
+        "ShowGeometry": true,
+        "X": 972.5729293034292,
+        "Y": 332.82951121911736
+      },
+      {
+        "Id": "df74ec2225e54620881a8334b67fbb23",
+        "Name": "Python Script",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 1421.3943437036753,
+        "Y": 164.21899816627547
+      }
+    ],
+    "Annotations": [],
+    "X": -2205.0817971375795,
+    "Y": 166.6260405167783,
+    "Zoom": 1.6947723457127994
+  }
+}

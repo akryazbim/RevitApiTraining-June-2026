@@ -1,0 +1,13 @@
+C:\Users\Akryazz\repos\RevitAPI\June 2026\ZeroTouchNode\ZeroTouchNode-July-2026\ZeroTouchNode-July-2026\bin\Debug\net8.0\ZeroTouchNode-July-2026.deps.json
+C:\Users\Akryazz\repos\RevitAPI\June 2026\ZeroTouchNode\ZeroTouchNode-July-2026\ZeroTouchNode-July-2026\bin\Debug\net8.0\ZeroTouchNode-July-2026.dll
+C:\Users\Akryazz\repos\RevitAPI\June 2026\ZeroTouchNode\ZeroTouchNode-July-2026\ZeroTouchNode-July-2026\bin\Debug\net8.0\ZeroTouchNode-July-2026.pdb
+C:\Users\Akryazz\repos\RevitAPI\June 2026\ZeroTouchNode\ZeroTouchNode-July-2026\ZeroTouchNode-July-2026\obj\Debug\net8.0\ZeroTouchNode-July-2026.csproj.AssemblyReference.cache
+C:\Users\Akryazz\repos\RevitAPI\June 2026\ZeroTouchNode\ZeroTouchNode-July-2026\ZeroTouchNode-July-2026\obj\Debug\net8.0\ZeroTouchNode-July-2026.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Akryazz\repos\RevitAPI\June 2026\ZeroTouchNode\ZeroTouchNode-July-2026\ZeroTouchNode-July-2026\obj\Debug\net8.0\ZeroTouchNode-July-2026.AssemblyInfoInputs.cache
+C:\Users\Akryazz\repos\RevitAPI\June 2026\ZeroTouchNode\ZeroTouchNode-July-2026\ZeroTouchNode-July-2026\obj\Debug\net8.0\ZeroTouchNode-July-2026.AssemblyInfo.cs
+C:\Users\Akryazz\repos\RevitAPI\June 2026\ZeroTouchNode\ZeroTouchNode-July-2026\ZeroTouchNode-July-2026\obj\Debug\net8.0\ZeroTouchNode-July-2026.csproj.CoreCompileInputs.cache
+C:\Users\Akryazz\repos\RevitAPI\June 2026\ZeroTouchNode\ZeroTouchNode-July-2026\ZeroTouchNode-July-2026\obj\Debug\net8.0\ZeroTouchNode-July-2026.sourcelink.json
+C:\Users\Akryazz\repos\RevitAPI\June 2026\ZeroTouchNode\ZeroTouchNode-July-2026\ZeroTouchNode-July-2026\obj\Debug\net8.0\ZeroTouchNode-July-2026.dll
+C:\Users\Akryazz\repos\RevitAPI\June 2026\ZeroTouchNode\ZeroTouchNode-July-2026\ZeroTouchNode-July-2026\obj\Debug\net8.0\refint\ZeroTouchNode-July-2026.dll
+C:\Users\Akryazz\repos\RevitAPI\June 2026\ZeroTouchNode\ZeroTouchNode-July-2026\ZeroTouchNode-July-2026\obj\Debug\net8.0\ZeroTouchNode-July-2026.pdb
+C:\Users\Akryazz\repos\RevitAPI\June 2026\ZeroTouchNode\ZeroTouchNode-July-2026\ZeroTouchNode-July-2026\obj\Debug\net8.0\ref\ZeroTouchNode-July-2026.dll

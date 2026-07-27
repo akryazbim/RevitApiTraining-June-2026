@@ -1,0 +1,37 @@
+﻿using Autodesk.Revit.DB;
+using Revit.Elements;
+using RevitServices.Persistence;
+using RevitServices.Transactions;
+using Revit.GeometryConversion;
+
+namespace ZeroTouchNode_July_2026
+{
+    public class RevitOperations
+    {
+
+        public static string GetName(Revit.Elements.Element Element)
+        {
+            return Element.Name;
+        }
+
+        public static int GetWallCount()
+        {
+            //walls = FilteredElementCollector(doc).OfClass(Wall).ToElements()
+            //return len(walls)
+
+            var doc = DocumentManager.Instance.CurrentDBDocument;
+
+            var walls = new FilteredElementCollector(doc).OfClass(typeof(Autodesk.Revit.DB.Wall)).ToElements();
+            var wallCounts = walls.Count;
+
+            return wallCounts;
+        }
+
+        public static void CreateWall(Revit.Elements.Element DetailLine)
+        {
+            var dl = DetailLine.ToRevitType(true);
+        }
+
+
+    }
+}

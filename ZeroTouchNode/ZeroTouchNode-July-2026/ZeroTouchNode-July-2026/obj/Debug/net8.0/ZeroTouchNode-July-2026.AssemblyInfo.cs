@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ZeroTouchNode-July-2026")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+71ad2503f5cc1d55dccba98470a20e9c2a3c7b39")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3b98256ffe55684d6665514cec0caa723490cc16")]
 [assembly: System.Reflection.AssemblyProductAttribute("ZeroTouchNode-July-2026")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ZeroTouchNode-July-2026")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
